@@ -1,0 +1,235 @@
+body, p, ul, li, h1, h2, h3 {
+    margin: 0px;
+    padding: 0px;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.demo-label {
+    display: inline-block;
+    margin-left: 12px;
+}
+
+.demo-radio {
+    display: none;
+}
+
+.demo-radioInput {
+    background-color: #fff;
+    border: 1px solid #999999;
+    border-radius: 100%;
+    display: inline-block;
+    height: 14px;
+    margin-right: 10px;
+    margin-top: -1px;
+    vertical-align: middle;
+    width: 14px;
+    line-height: 1;
+}
+
+.demo-radio:checked + .demo-radioInput:after {
+    background-color: #6699ff;
+    border-radius: 100%;
+    content: "";
+    display: inline-block;
+    height: 10px;
+    margin: 2px;
+    width: 10px;
+}
+
+table {
+    border-spacing: 0px;
+    width: 100%;
+    margin: 0 auto;
+    font-family: verdana, arial, sans-serif;
+    font-size: 12px;
+    background-color: #FFFFFF;
+    border-left: 1px solid #dcdcdc;
+    border-bottom: 1px solid #dcdcdc;
+    margin-top: 20px;
+}
+
+table tr {
+    height: 40px;
+}
+
+/*.sceending table tr::-moz-selection{
+	background:#6699FF;
+	color:#FFFFFF;
+}
+.sceending table tr::selection{
+	background:#e4edfe;color:#FFFFFF;
+}*/
+table th {
+    width: 100px;
+
+    font-size: 16px;
+    background-color: #e5e5e5;
+    text-align: center;
+    border-top: 1px solid #dcdcdc;
+    border-right: 1px solid #dcdcdc;
+}
+
+table td {
+    height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 3px;
+    text-align: center;
+    border-top: 1px solid #dcdcdc;
+    border-right: 1px solid #dcdcdc;
+}
+
+.second_header {
+    background-color: #f7e7ff;
+}
+
+.tabs-underline {
+    box-sizing: border-box;
+
+    background-color: #fff;
+}
+
+/* The tabs */
+
+.tabs-underline ul {
+    list-style: none;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #DCDCDC;
+}
+
+.tabs-underline ul li {
+    display: inline-block;
+}
+
+.tabs-underline ul li a {
+    display: block;
+    text-decoration: none;
+    color: #333333;
+    font-size: 14px;
+    padding: 10px 16px 10px 16px;
+
+}
+
+.tabs-underline ul li a.tab-active {
+    color: #6699ff;
+    border-bottom: 3px solid #6699ff;
+}
+
+.lb {
+    width: 100%;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.lb p {
+    margin-right: 10px;
+    float: left;
+    line-height: 34px;
+    font-weight: 600;
+
+}
+
+.lb a {
+    float: left;
+}
+
+.lb #firstType, .lb #secondType {
+    border: 1px solid #dcdcdc;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 20px;
+    border-radius: 2px;
+
+}
+
+
+.breadcrumb {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.breadcrumb h1 {
+    float: left;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 40px;
+}
+
+.breadcrumb ul {
+    float: left;
+    margin-left: 10px;
+    line-height: 40px;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+}
+
+.breadcrumb ul span {
+    float: left;
+    display: inline-block;
+    margin-left: 4px;
+    margin-right: 4px;
+    color: #999999;
+    line-height: 40px;
+    font-size: 14px;
+
+}
+
+.breadcrumb .blue {
+    color: #6699FF;
+
+}
+
+.breadcrumb ul li {
+    float: left;
+    text-align: left;
+    text-decoration: none;
+    list-style-type: none;
+}
+
+.datagrid {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.datagrid .title {
+    width: 50%;
+    float: left;
+}
+
+.datagrid .title .block {
+    width: 4px;
+    height: 16px;
+    float: left;
+    background: #6699FF;
+}
+
+.datagrid .title .text {
+    margin-left: 12px;
+    font-weight: 600;
+    float: left;
+    line-height: 16px;
+    font-size: 16px;
+}
+
+.datagrid .time {
+    float: right;
+    font-size: 14px;
+}
+
+.datagrid .time p {
+    float: right;
+    line-height: 16px;
+}
+
+.datagrid .time label {
+    float: right;
+    line-height: 16px;
+}
+

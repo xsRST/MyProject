@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="easyui/jquery-1.10.2.min.js"></script>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+        }
+
+        #nav {
+            width: 600px;
+            height: 40px;
+            background-color: #eee;
+            margin: 0 auto;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        ul li {
+            float: left;
+            text-align: center;
+            width: 100px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+
+        a:hover {
+            color: #6699ff;
+
+        }
+
+        ul li ul li {
+            float: none;
+            background-color: #eee;
+            margin: 2px 0px;
+        }
+
+        ul li ul {
+            display: none;
+        }
+
+        a:link, a:visited, a:hover, a:active {
+            color: black;
+            text-decoration: none
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        .demo-label {
+            display: inline-block;
+            margin-left: 12px;
+        }
+
+        .demo-radio {
+            display: none;
+        }
+
+        .demo-radioInput {
+            background-color: #fff;
+            border: 1px solid #999999;
+            border-radius: 100%;
+            display: inline-block;
+            height: 14px;
+            margin-right: 10px;
+            margin-top: -1px;
+            vertical-align: middle;
+            width: 14px;
+            line-height: 1;
+        }
+
+        .demo-radio:checked + .demo-radioInput:after {
+            background-color: #6699ff;
+            border-radius: 100%;
+            content: "";
+            display: inline-block;
+            height: 10px;
+            margin: 2px;
+            width: 10px;
+        }
+
+        .breadcrumb {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .breadcrumb h1 {
+            float: left;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 40px;
+        }
+
+        .breadcrumb ul {
+            float: left;
+            margin-left: 10px;
+            line-height: 40px;
+            font-size: 14px;
+            text-decoration: none;
+            border: none;
+        }
+
+        .breadcrumb ul span {
+            float: left;
+            display: inline-block;
+            margin-left: 4px;
+            margin-right: 4px;
+            color: #999999;
+            line-height: 40px;
+            font-size: 14px;
+
+        }
+
+        .breadcrumb .blue {
+            color: #6699FF;
+
+        }
+
+        .breadcrumb ul li {
+            float: left;
+            text-align: left;
+            text-decoration: none;
+            list-style-type: none;
+        }
+
+        .datagrid {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .datagrid .title {
+            width: 50%;
+            float: left;
+        }
+
+        .datagrid .title .block {
+            width: 4px;
+            height: 16px;
+            float: left;
+            background: #6699FF;
+        }
+
+        .datagrid .title .text {
+            margin-left: 12px;
+            font-weight: 600;
+            float: left;
+            line-height: 16px;
+            font-size: 16px;
+        }
+
+        .datagrid .time {
+            float: right;
+            font-size: 14px;
+        }
+
+        .datagrid .time p {
+            float: left;
+            line-height: 16px;
+        }
+
+        .datagrid .time label {
+            float: left;
+            line-height: 16px;
+        }
+
+        /* 未访问的链接 */
+
+        /*.tab {
+            background-color: #dcdcdc
+        }*/
+
+        .tabs-underline ul {
+            list-style: none;
+            text-align: left;
+            margin: 0;
+            padding: 0;
+            border-bottom: 1px solid #DCDCDC;
+        }
+
+        .tabs-underline ul li {
+            display: inline-block;
+        }
+
+        .tabs-underline ul li a {
+            display: block;
+            text-decoration: none;
+            color: #333333;
+            font-size: 14px;
+            padding: 10px 16px 10px 16px;
+
+        }
+
+        .tabs-underline ul li a.tab-active {
+            color: #6699ff;
+            border-bottom: 3px solid #6699ff;
+        }
+
+        .lb {
+            width: 100%;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .lb p {
+            margin-right: 10px;
+            float: left;
+            line-height: 34px;
+            font-weight: 600;
+
+        }
+
+        .lb a {
+            float: left;
+        }
+
+        .lb #firstType, .lb #secondType {
+            border: 1px solid #dcdcdc;
+            height: 30px;
+            line-height: 30px;
+            margin-right: 20px;
+            border-radius: 2px;
+
+        }
+
+    </style>
+
+</head>
+<body style="padding:0px 20px;">
+
+<div style="display: block;width:100%;">
+    <div class="tabs-underline">
+
+        <div style="display: block;width:100%;">
+
+            <ul>
+                <li>
+                    <a class="tab-active" name="defaultTab" value="Equity" href="#">股票</a>
+                </li>
+                <li>
+                    <a value="Repo" href="#">回购</a>
+                </li>
+                <li>
+                    <a value="Future" href="#">期货</a>
+                </li>
+                <li>
+                    <a value="Fund" href="#">基金</a>
+                </li>
+                <div class='clearfix'></div>
+            </ul>
+
+
+        </div>
+    </div>
+
+    <div class='breadcrumb' style="clear:both">
+        <!--<h1>当前选择：</h1>
+        <ul>
+            <li class="blue">盘口交易分析</li>
+            <span>></span>
+            <li class="blue">板块</li>
+            <div class='clearfix'></div>
+        </ul>
+-->
+
+    </div>
+
+
+    <div id="tabs-content-placeholder" style='margin-top:20px;'>
+        <div>
+
+            <div class='lb'>
+                <p>选择分析的大类别:</p>
+                <div class='tj'>
+
+                    <select id="firstType">
+                        <option value="SpreadCost">盘口交易成本</option>
+                        <option value="PerformanceVWAP">滑点(VWAP)</option>
+                        <option value="PerformanceArrival">滑点（到达价格）</option>
+                        <option value="PostTradePrice">滑点(收盘价格)</option>
+                        <option value="CancelRate">撤单率</option>
+                    </select>
+
+                    <div class='clearfix'></div>
+
+                </div>
+                <div class='clearfix'></div>
+            </div>
+            <div class='lb'>
+                <p>选择分析的小类别:</p>
+                <div class='tj'>
+
+
+                    <select id="secondType">
+                        <option value="All">所有</option>
+                        <option value="MarketCap">板块</option>
+                        <option value="Volatility">波动性</option>
+                        <option value="OrderSize">订单量</option>
+                        <option value="Participate">占比</option>
+                        <option value="TradingDuration">执行时间</option>
+                        <option value="TradeStyle">执行风格</option>
+                    </select>
+
+                    <div class='clearfix'></div>
+
+
+                </div>
+                <div class='clearfix'></div>
+            </div>
+            <div class='datagrid'>
+                <div class='title'>
+                    <div class='block'></div>
+                    <div class='text'>数据明细</div>
+                    <div class='clearfix'></div>
+                </div>
+                <div class='time'>
+
+                    <div>
+                        <p>统计区间：</p>
+
+                        <label class='demo-label'>
+                            <input class='demo-radio' type='radio' name='demo-radio' value="YTD">
+                            <span class='demo-radioInput'></span>年
+                        </label>
+                        <label class='demo-label'>
+                            <input class='demo-radio' type='radio' name='demo-radio' value="QTD">
+                            <span class='demo-radioInput'></span>季度
+                        </label>
+                        <label class='demo-label'>
+                            <input class='demo-radio' type='radio' name='demo-radio' value="MTD">
+                            <span class='demo-radioInput'></span>月
+                        </label>
+                        <label class='demo-label'>
+                            <input class='demo-radio' type='radio' name='demo-radio' value="Today">
+                            <span class='demo-radioInput'></span>日
+                        </label>
+                    </div>
+
+                </div>
+                <div class='clearfix'></div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    <div id="pageone" style='margin-top:30px;'>
+
+    </div>
+    <script type="text/javascript">
+
+        var prefixUrl = "PostReport";
+        var security = "";
+        var firstType = "";
+        var secondType = "";
+        var period = "";
+
+        $(document).ready(function () {
+
+            var widget = $('.tabs-underline');
+
+            var tabs = widget.find('ul a'),
+                content = widget.find('.tabs-content-placeholder > div');
+
+            tabs.on('click', function (e) {
+
+                e.preventDefault();
+
+                // Get the data-index attribute, and show the matching content div
+
+                var index = $(this).data('index');
+
+                tabs.removeClass('tab-active');
+                content.removeClass('tab-content-active');
+
+                $(this).addClass('tab-active');
+                content.eq(index).addClass('tab-content-active');
+
+                security = $(this).attr("value");
+
+                loadPts();
+            });
+        });
+
+
+        $("#firstType").change(function () {
+            firstType = $(this).find('option:selected').val();
+            loadPts();
+        });
+
+
+        $("#secondType").change(function () {
+            secondType = $(this).find('option:selected').val();
+            loadPts();
+        });
+
+        $(".demo-radio").click(function () {
+            period = $(this).attr("value");
+            loadPts();
+        });
+
+        function getUrl() {
+            if (secondType == "All") {
+                secondType = firstType;
+            }
+
+            var resultUrl = prefixUrl + "/" + security + "/" + firstType + "/" + period + "." + firstType + "." + secondType + ".html";
+            return resultUrl;
+        }
+
+        function loadPts() {
+            var url = getUrl();
+            if (checkForm() == false) {
+                return false;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: "",
+                success: function (msg) {
+                    $("#pageone").html(msg);
+                },
+                error: function (XMLHttpRequest, textStatus, thrownError) {
+                }
+            })
+
+
+        }
+
+        function checkForm() {
+            if (security.replace(/(^s*)|(s*$)/g, "").length == 0) {
+                alert("未选择证券类型");
+                return false;
+            }
+            if (firstType.replace(/(^s*)|(s*$)/g, "").length == 0) {
+                alert("未选择一级类别");
+                return false;
+            }
+            if (secondType.replace(/(^s*)|(s*$)/g, "").length == 0) {
+                alert("未选择二级类别");
+                return false;
+            }
+            if (period.replace(/(^s*)|(s*$)/g, "").length == 0) {
+                alert("未选择统计区间");
+                return false;
+            }
+            return true;
+        }
+
+        function init() {
+
+            /*$("[name='defaultTab']").css("background-color", "#6699ff");*/
+            security = "Equity";
+
+            firstType = "SpreadCost";
+            $("#firstType option[value='SpreadCost']").attr("selected", true);
+            secondType = "MarketCap";
+            $("#secondType option[value='MarketCap']").attr("selected", true);
+
+            $(".demo-radio[value='YTD']").attr("checked", true);
+            period = "YTD";
+
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            init();
+            loadPts();
+        })
+
+
+    </script>
+</div>
+</body>
+
+</html>

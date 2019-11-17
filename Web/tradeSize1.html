@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="easyui/themes/black/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="easyui/demo/demo.css">
+    <script type="text/javascript" src="easyui/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+    <link rel="stylesheet" href="amstockchart_3.21.6/amcharts/style.css" type="text/css">
+    <script src="amstockchart_3.21.6/amcharts/amcharts.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/serial.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/amstock.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/themes/dark.js" type="text/javascript"></script>
+</head>
+<body style="padding: 10px;">
+<!-- HTML -->
+<div id="mainLayout" class="easyui-layout" style="width:100%;height:1500px;">
+    <div data-options="region:'north'">
+        </select>
+        请输入证券代码:
+        <input id="symbol" type="text" style="border:1px solid #e5e5e5;height:24px;width:120px;padding-left:5px;"
+               class='textbox combo datebox'/>
+        <input id="confirm" type="button" value="确定" class='textbox combo datebox'
+               style="height:24px;width:50px;background:#6699ff;border-radius:2px;outline:none;border:none;color:#ffffff;"/>
+    </div>
+
+    <div id="orderDiagram" data-options="region:'center',title:'策略指令执行图解'" style="width:100%;">
+        <div id="chartContainer" style="width:100%; height:780px;"></div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+
+        function ajaxLoading() {
+            $("<div class=\"datagrid-mask\"></div>").css({
+                display: "block",
+                width: "100%",
+                height: "1500px"
+            }).appendTo("body");
+            $("<div class=\"datagrid-mask-msg\"></div>").html("正在处理，请稍候。。。").appendTo("body").css({
+                display: "block",
+                left: ($(document.body).outerWidth(true) - 190) / 2,
+                top: ($(window).height() - 45) / 2
+            });
+        }
+
+        function ajaxLoadEnd() {
+            $(".datagrid-mask").remove();
+            $(".datagrid-mask-msg").remove();
+        }
+
+
+        $('#confirm').click(function () {
+            var symbol = $("#symbol").val();
+            if (symbol.replace(/(^s*)|(s*$)/g, "").length == 0) {
+                alert("未输入证券代码");
+                return false;
+            }
+            if (symbol.split(".").length < 2) {
+                alert("证券代码未加后缀(交易所)");
+                return false;
+            }
+            loadHistVolChart(symbol)
+        });
+
+        var data = [{"timeStamp": 1573865700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573866000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573866300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573866600000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573866900000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573867200000,
+            "tradeSize": "148012.900"
+        }, {"timeStamp": 1573867500000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573867800000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573868100000, "tradeSize": "14826.000"}, {
+            "timeStamp": 1573868400000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573868700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573869000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573869300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573869600000,
+            "tradeSize": "127503.600"
+        }, {"timeStamp": 1573869900000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573870200000,
+            "tradeSize": "25204.200"
+        }, {"timeStamp": 1573870500000, "tradeSize": "36323.700"}, {
+            "timeStamp": 1573870800000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573871100000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573871400000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573871700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573872000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573872300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573872600000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573872900000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573873200000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573873500000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573873800000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573874100000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573874400000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573874700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573875000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573875300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573875600000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573875900000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573876200000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573876500000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573876800000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573877100000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573877400000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573877700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573878000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573878300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573878600000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573878900000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573879200000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573879500000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573879800000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573880100000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573880400000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573880700000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573881000000,
+            "tradeSize": "0.000"
+        }, {"timeStamp": 1573881300000, "tradeSize": "0.000"}, {
+            "timeStamp": 1573881600000,
+            "tradeSize": "14826.000"
+        }, {"timeStamp": 1573881900000, "tradeSize": "0.000"}];
+        var theSymbol = "";
+
+        function strToDate(datestr) {
+            //yyyymmdd HH:MM:SS
+            var myDate = new Date(datestr);
+            return datestr;
+        }
+
+        function drawHistVolChart(chartData) {
+            for (var i = 0; i < chartData.length; i++) {
+                chartData[i].timeStamp = strToDate(chartData[i].timeStamp);
+            }
+
+            AmCharts.makeChart("chartContainer", {
+                type: "stock",
+                dataDateFormat: "JJ:NN:SS",
+                dataSets: [{
+                    fieldMappings: [
+                        {
+                            fromField: "tradeSize",
+                            toField: "tradeSize"
+                        }
+                    ],
+                    dataProvider: chartData,
+                    categoryField: "timeStamp"
+                }],
+                panels: [{
+                    showCategoryAxis: true,
+                    title: theSymbol,
+                    percentHeight: 30,
+                    stockGraphs: [{
+                        periodValue: "Sum",
+                        id: "g1",
+                        title: "交易量",
+                        valueField: "tradeSize",
+                        type: "column",
+                        fixedColumnWidth: 5,
+                        cornerRadiusTop: 2,
+                        useDataSetColors: false,
+                        lineAlpha: 0,
+                        fillAlphas: 1,
+                        fillColors: "#FF6600"
+                    }],
+                }],
+
+                categoryAxesSettings: {
+                    equalSpacing: false,
+                    parseDates: false,
+                    minPeriod: "5mm",
+                    dashLength: 2
+                },
+                chartScrollbarSettings: {
+                    color: "#00FF00",
+                    backgroundColor: "#444",
+                    selectedBackgroundColor: "#666666"
+                },
+                chartCursorSettings: {
+                    valueBalloonsEnabled: true,
+                    fullWidth: true,
+                    cursorAlpha: 0.1,
+                    valueLineBalloonEnabled: true,
+                    valueLineEnabled: true,
+                    valueLineAlpha: 0.5
+                },
+
+
+                periodSelector: {
+                    position: "top",
+                    dateFormat: "JJ:NN:SS",
+                    inputFieldWidth: 100,
+                    periods: [{
+                        period: "hh",
+                        count: 1,
+                        label: "1 hour"
+                    }, {
+                        period: "hh",
+                        count: 2,
+                        label: "2 hours"
+                    }, {
+                        period: "MAX",
+                        label: "MAX",
+                        selected: true
+                    }]
+                }
+            })
+
+
+        }
+
+        drawHistVolChart(data);
+
+        function loadHistVolChart(theSymbol) {
+
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                async: false,
+                url: "http://localhost:8199/getHistVolData",
+                data: {theSymbol: theSymbol},
+                beforeSend: ajaxLoading(),
+                success: function (json) {
+                    drawHistVolChart(json);
+
+                },
+                complete: function () {
+                    ajaxLoadEnd();
+                },
+                error: function () {
+                    alert("系统异常");
+                    ajaxLoadEnd();
+                }
+            });
+        }
+
+
+    });
+
+</script>
+</body>
+</html>

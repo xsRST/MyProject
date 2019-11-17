@@ -1,0 +1,38 @@
+.tabs-underline {
+    box-sizing: border-box;
+    border: 1px solid #DCDCDC;
+    background-color: #fff;
+}
+
+/* The tabs */
+
+.tabs-underline ul {
+    list-style: none;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #DCDCDC;
+}
+
+.tabs-underline ul li {
+    display: inline-block;
+}
+
+.tabs-underline ul li a {
+    display: block;
+    text-decoration: none;
+    color: #333333;
+    font-size: 14px;
+    padding: 10px 16px 10px 16px;
+
+}
+
+.tabs-underline ul li a.tab-active {
+    color: #6699ff;
+    border-bottom: 3px solid #6699ff;
+}
+
+
+
+
+

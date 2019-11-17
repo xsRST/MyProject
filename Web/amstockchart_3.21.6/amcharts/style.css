@@ -1,0 +1,61 @@
+.amChartsDataSetSelector {
+    font-size: 12px;
+    font-family: verdana, helvetica, arial, sans-serif;
+}
+
+.amChartsPeriodSelector {
+    font-size: 12px;
+    font-family: verdana, helvetica, arial, sans-serif;
+}
+
+.amChartsButtonSelected {
+    background-color: #E55957;
+    border-style: solid;
+    border-color: #E55957;
+    border-width: 1px;
+    color: #FFFFFF;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    margin: 1px;
+    outline: none;
+    box-sizing: border-box;
+    line-height: 20px;
+}
+
+.amChartsButton {
+    color: #666666;
+    background: transparent;
+    border: 1px solid #e5e5e5;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    margin: 1px;
+    outline: none;
+    box-sizing: border-box;
+    line-height: 20px;
+}
+
+.amChartsCompareList {
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-width: 1px;
+}
+
+.amChartsCompareList div {
+    -webkit-box-sizing: initial;
+    box-sizing: initial;
+}
+
+.amChartsInputField {
+    border-radius: 2px;
+    outline: none;
+    border: 1px solid #dcdcdc;
+    line-height: 20px;
+}
+
+.amChartsLegend {
+
+}
+
+.amChartsPanel {
+
+}

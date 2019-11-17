@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <META HTTP-EQUIV="pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Cache-Control" CONTENT="no-store, must-revalidate">
+    <META HTTP-EQUIV="expires" CONTENT="0">
+
+    <link rel="stylesheet" type="text/css" href="easyui/themes/black/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="easyui/demo/demo.css">
+    <script type="text/javascript" src="easyui/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+    <link rel="stylesheet" href="amstockchart_3.21.6/amcharts/style.css" type="text/css">
+    <script src="amstockchart_3.21.6/amcharts/amcharts.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/serial.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/amstock.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/themes/dark.js" type="text/javascript"></script>
+</head>
+<body style="padding: 10px;">
+<div id="mainLayout" class="easyui-layout" style="width:100%;height:1500px;">
+    <div id="mainPanel" data-options="region:'center',title:'策略指令信息'">
+        <div id="orderLayout" class="easyui-layout" style="width:100%;height:1200px;">
+
+            <div id="orderPanel" data-options="region:'north'" style="width:100%;height:120px">
+                <table id="orderGrid" style="width:100%;">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'orderId',headAlign:'center',align:'center',width:'8%'">母单ID</th>
+                        <th data-options="field:'status',headAlign:'center',align:'center',width:'5%'">母单状态</th>
+                        <th data-options="field:'symbol',headAlign:'center',align:'center',width:'7%'">证券代码</th>
+                        <th data-options="field:'name',headAlign:'center',align:'center',width:'7%'">证券名称</th>
+                        <th data-options="field:'side',headAlign:'center',align:'center',width:'4%'">方向</th>
+                        <th data-options="field:'orderQty',headAlign:'center',align:'center',width:'7%'">数量</th>
+                        <th data-options="field:'orderPrice',headAlign:'center',align:'center',width:'5%'">价格</th>
+                        <th data-options="field:'execQty',headAlign:'center',align:'center',width:'7%'">成交数量</th>
+                        <th data-options="field:'execPrice',headAlign:'center',align:'center',width:'7%'">成交均价</th>
+                        <th data-options="field:'execPercent',headAlign:'center',align:'center',width:'7%'">成交进度(%)</th>
+                        <th data-options="field:'strategyName',headAlign:'center',align:'center',width:'7%'">策略名称</th>
+                        <th data-options="field:'orderStartTime',headAlign:'center',align:'center',width:'5%'">开始时间</th>
+                        <th data-options="field:'orderEndTime',headAlign:'center',align:'center',width:'5%'">结束时间</th>
+                        <th data-options="field:'strategyStyle',headAlign:'center',align:'center',width:'5%'">风格</th>
+                        <th data-options="field:'parRate',headAlign:'center',align:'center',width:'7%'">最大占比(%)</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="orderDiagram" class="easyui-tabs" data-options="region:'center',title:'策略指令执行图解'"
+                 style="width:100%;">
+                <div id="bubbleChartPanel" title="交易分析曲线" data-options="iconCls:'icon-reload'"
+                     style="padding:10px;width:100%;">
+                    <div id="bubble" style="width:100%; height:780px;"></div>
+                </div>
+                <div id="histVolPanel" title="量化数据曲线" data-options="iconCls:'icon-reload'"
+                     style="padding:10px;width:100%; ">
+                    <div id="histVol" style="width:100%; height:780px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var theDate = "";
+    var theOrderID = "";
+    var theOrderQty = "";
+    var theSymbol = "";
+    var chartLoaded = [];
+
+    function initChartLoadArray() {
+        var arrayLength = chartLoaded.length;
+        for (var i = 0; i < arrayLength; i++) {
+            chartLoaded[i] = false;
+        }
+    }
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    initChartLoadArray();
+    theOrderID = getQueryString("orderID");
+    theDate = getQueryString("date");
+    theSymbol = getQueryString("symbol");
+
+    function strToDate(datestr) {
+        //yyyymmdd HH:MM:SS
+        var myDate = new Date();
+        myDate.setFullYear(datestr.substring(0, 4));
+        myDate.setMonth((parseInt(datestr.substring(4, 6)) - 1).toString());
+        myDate.setDate(datestr.substring(6, 8));
+        myDate.setHours(datestr.substring(9, 11));
+        myDate.setMinutes(datestr.substring(12, 14));
+        myDate.setSeconds(datestr.substring(15, 17));
+        return myDate;
+
+    }
+
+    /**
+     * 禁止回退按钮
+     */
+    function forbidBack() {
+        appUtils.mobileConfirm("确定放弃?", function () {//yes
+            window.removeEventListener('popstate', forbidBack);
+        }, function () {//no
+            //防止页面后退
+            history.pushState(null, null, document.URL);
+        });
+    }
+
+    if (window.history && window.history.pushState) {
+        history.pushState(null, null, document.URL);
+        window.addEventListener('popstate', forbidBack);
+    }
+
+    function ajaxLoading() {
+        $("<div class=\"datagrid-mask\"></div>").css({
+            display: "block",
+            width: "100%",
+            height: "1500px"
+        }).appendTo("body");
+        $("<div class=\"datagrid-mask-msg\"></div>").html("正在处理，请稍候。。。").appendTo("body").css({
+            display: "block",
+            left: ($(document.body).outerWidth(true) - 190) / 2,
+            top: ($(window).height() - 45) / 2
+        });
+    }
+
+    function ajaxLoadEnd() {
+        $(".datagrid-mask").remove();
+        $(".datagrid-mask-msg").remove();
+    }
+
+    function loadBubbleChart() {
+        $.ajax({
+            type: "GET",
+            url: "bubbleChartData",
+            dataType: "json",
+            async: false,
+            data: {orderID: theOrderID, date: theDate, symbol: theSymbol, orderQty: theOrderQty},
+            beforeSend: ajaxLoading(),
+            success: function (json) {
+                drawBubbleChart(json);
+                //  chartLoaded[0] = true;
+            },
+            complete: function () {
+                ajaxLoadEnd();
+            }
+        });
+    }
+
+    function drawBubbleChart(chartData) {
+
+        var orderData = [];
+        var bSize = 10;
+        var color;
+        var arrayLength = chartData.length;
+
+        if (arrayLength == 0) {
+            alert("没有行情信息或没有委托信息");
+        } else {
+
+
+            var largestOrderQty = 1;
+            var smallestOrderQty = 1;
+
+            for (var i = 0; i < arrayLength; i++) {
+                chartData[i].time = strToDate(chartData[i].time);
+
+                if ("orderPrice" in chartData[i]) {
+                    var orderQty = parseInt(chartData[i].orderQty);
+                    if (largestOrderQty == 1) largestOrderQty = orderQty;
+                    if (smallestOrderQty == 1) smallestOrderQty = orderQty;
+                    if (orderQty > largestOrderQty) largestOrderQty = orderQty;
+                    if (orderQty < smallestOrderQty) smallestOrderQty = orderQty;
+
+                }
+            }
+
+            for (var i = 0; i < arrayLength; i++) {
+                if ("orderPrice" in chartData[i]) {
+
+                    switch (chartData[i].orderStatus) {
+                        case "NEW":
+                            color = "#0000CC";
+                            break;
+                        case "PARTIALLY_FILLED":
+                            color = "#CC00CC";
+                            break;
+                        case "FILLED":
+                            color = "#00CC00";
+                            break;
+                        case "CANCELED":
+                            color = "#CCCCCC";
+                            break;
+                        default:
+                            color = "#CC0000";
+                    }
+
+                    orderData.push({
+                        date: chartData[i].time,
+                        value: chartData[i].orderPrice,
+                        backgroundColor: color,
+                        rollOverColor: color,
+                        fontSize: Math.max(Math.floor((parseInt(chartData[i].orderQty) / (largestOrderQty + smallestOrderQty)) * 24), 4),
+                        text: "",
+                        description: chartData[i].orderDescription,
+                        type: "round",
+                        graph: "orderBubble"
+                    });
+                }
+            }
+
+            var chart = AmCharts.makeChart("bubble", {
+                type: "stock",
+                theme: "light",
+                bezierX: 30,
+                bezierY: 20,
+                dataDateFormat: "YYYY-MM-DD JJ:NN:SS",
+                balloon: {
+                    textAlign: "left",
+                    fadeOutDuration: 0.5,
+                    maxWidth: 700,
+                    offsetY: -1000,
+                    pointerOrientation: "up"
+
+                },
+
+                categoryAxesSettings: {
+                    equalSpacing: true,
+                    minPeriod: "ss",
+                    maxSeries: 500,
+                    groupToPeriods: ["10ss", "30ss"]
+                },
+
+                dataSets: [{
+                    fieldMappings: [{
+                        fromField: "limitPrice",
+                        toField: "limitPrice"
+                    }, {
+                        fromField: "lastPrice",
+                        toField: "lastPrice"
+                    }, {
+                        fromField: "parRate",
+                        toField: "parRate"
+                    }, {
+                        fromField: "cumQty",
+                        toField: "cumQty"
+                    }, {
+                        fromField: "execRate",
+                        toField: "execRate"
+                    }, {
+                        fromField: "marketVWAPPrice",
+                        toField: "marketVWAPPrice"
+                    }, {
+                        fromField: "orderPrice",
+                        toField: "orderPrice"
+                    }
+                        , {
+                            fromField: "VWAPPerformance",
+                            toField: "VWAPPerformance"
+                        }
+                        , {
+                            fromField: "arrivalPerformance",
+                            toField: "arrivalPerformance"
+                        }, {
+                            fromField: "orderPrice",
+                            toField: "orderFilled"
+                        }
+                        , {
+                            fromField: "orderPartiallyFilled",
+                            toField: "orderPartiallyFilled"
+                        }, {
+                            fromField: "orderNew",
+                            toField: "orderNew"
+                        }, {
+                            fromField: "orderCanceled",
+                            toField: "orderCanceled"
+                        }, {
+                            fromField: "orderRejected",
+                            toField: "orderRejected"
+                        }, {
+                            fromField: "legendSeprator",
+                            toField: "legendSeprator"
+                        }
+                    ],
+                    dataProvider: chartData,
+                    categoryField: "time",
+                    stockEvents: orderData
+                }],
+
+                panels: [{
+                    percentHeight: 60,
+                    valueAxes: [
+                        {
+                            id: "priceAxis1"
+                        },
+                        {
+                            id: "priceAxis2",
+                            position: "right"
+                        }
+                    ],
+
+                    stockGraphs: [
+                        {
+                            id: "bubbleLimitPrice",
+                            title: "限价",
+                            valueField: "limitPrice",
+                            type: "line",
+                            lineThickness: 3,
+                            lineAlpha: 0.7,
+                            useDataSetColors: false,
+                            lineColor: "#0D8ECF",
+                            valueAxis: "priceAxis1"
+                        }, {
+                            id: "bubbleLastPrice",
+                            title: "最新价",
+                            valueField: "lastPrice",
+                            type: "line",
+                            lineThickness: 3,
+                            lineAlpha: 0.7,
+                            lineColor: "#FF6600",
+                            useDataSetColors: false,
+                            valueAxis: "priceAxis1"
+                        }, {
+                            id: "bubbleVWAP",
+                            title: "市场 VWAP",
+                            valueField: "marketVWAPPrice",
+                            type: "line",
+                            lineThickness: 3,
+                            lineAlpha: 0.7,
+                            lineColor: "#FCD202",
+                            useDataSetColors: false,
+                            valueAxis: "priceAxis1"
+                        }, {
+                            id: "orderBubble",
+                            title: "成交",
+                            valueField: "orderFilled",
+                            type: "line",
+                            lineAlpha: 0,
+                            useDataSetColors: false,
+                            showBalloon: false,
+                            valueAxis: "priceAxis1",
+                            fillColors: "#00CC00",
+                            markerType: "circle"
+                        }
+                        , {
+                            id: "orderPartiallyFilled",
+                            title: "部成",
+                            valueField: "orderPartiallyFilled",
+                            useDataSetColors: false,
+                            legendColor: "#CC00CC",
+                            markerType: "circle",
+                            switchable: false
+                        }, {
+                            id: "orderNew",
+                            title: "新建",
+                            valueField: "orderNew",
+                            useDataSetColors: false,
+                            legendColor: "#0000CC",
+                            markerType: "circle",
+                            switchable: false
+                        }
+                        , {
+                            id: "orderCanceled",
+                            title: " 已撤",
+                            valueField: "orderCanceled",
+                            useDataSetColors: false,
+                            legendColor: "#CCCCCC",
+                            markerType: "circle",
+                            switchable: false
+                        }, {
+                            id: "orderRejected",
+                            title: " 拒绝",
+                            valueField: "orderRejected",
+                            useDataSetColors: false,
+                            legendColor: "#CC0000",
+                            markerType: "circle",
+                            switchable: false
+                        }, {
+                            id: "legendSeprator",
+                            //title: "<<<<---------->>>>",
+                            valueField: "legendSeprator",
+                            useDataSetColors: false,
+                            legendColor: "#FCD202",
+                            markerType: "none",
+                            switchable: false
+                        }, {
+                            id: "bubbleExecRate",
+                            title: "成交进度(%)",
+                            valueField: "execRate",
+                            type: "line",
+                            lineThickness: 3,
+                            lineAlpha: 0.7,
+                            lineColor: "#B0DE09",
+                            useDataSetColors: false,
+                            valueAxis: "priceAxis2"
+                        }
+                    ],
+                    stockLegend: {
+                        valueWidth: 0,
+                        spacing: 15
+                        /*     data:[
+                         {title: "Last Price", color: "#FF6600",markerType: "square"},
+                         {title: "Market VWAP", color: "#FCD202",markerType: "square"},
+                         {title: "Limit Price", color: "#0D8ECF",markerType: "square"},
+                         {title: "Order Filled", color: "#00CC00",markerType: "circle"},
+                         {title: "Order Partially-Filled", color: "#CC00CC",markerType: "circle"},
+                         {title: "Order New", color: "#0000CC",markerType: "circle"},
+                         {title: "Order Canceled", color: "#CCCCCC",markerType: "circle"},
+                         {title: "Order Rejected", color: "#CC0000",markerType: "circle"},
+                         {title: "<<<<---------->>>>", color: "#FCD202",markerType: "none"},
+                         {title: "Execution Rate", color: "#B0DE09",markerType: "square"}
+                         ]
+                         */
+                    }
+                },
+                    {
+//                  title: "Volume",
+                        type: "serial",
+                        percentHeight: 20,
+                        marginTop: 10,
+                        showCategoryAxis: true,
+
+                        valueAxes: [{
+                            id: "volumeAxis1",
+                            dashLength: 5
+                        },
+                            {
+                                id: "volumeAxis2",
+                                position: "right",
+//                            maximum: theParRate,
+                                minimum: 0,
+                                strictMinMax: false
+                            }],
+
+                        categoryAxis: {
+                            dashLength: 5
+                        },
+
+                        stockGraphs: [{
+                            id: "cumQty",
+                            periodValue: "Sum",
+                            title: "成交量比重 (%)",
+                            valueField: "cumQty",
+                            type: "column",
+                            fixedColumnWidth: 3,
+                            useDataSetColors: false,
+                            lineColor: "#666",
+                            fillColors: "#FF6600",
+                            fillAlphas: 1,
+                            valueAxis: "volumeAxis1",
+                            legendColor: "#FF6600"
+                        }, {
+                            id: "legendSeprator",
+                            //title: "<<<<---------->>>>",
+                            valueField: "legendSeprator",
+                            useDataSetColors: false,
+                            legendColor: "#FCD202",
+                            markerType: "none",
+                            switchable: false
+                        },
+                            {
+                                id: "bubbleParRate",
+                                title: "市场参与率 (%)",
+                                valueField: "parRate",
+                                type: "line",
+                                useDataSetColors: false,
+                                lineColor: "#FCD202",
+                                lineThickness: 2,
+                                valueAxis: "volumeAxis2"
+                            }],
+
+                        stockLegend: {
+                            valueWidth: 0,
+                            spacing: 15
+                            /*         data:[
+                             {title: "Cumulative Quantity", color: "#FF6600",markerType: "square"},
+                             {title: "<<<<---------->>>>",markerType: "none"},
+                             {title: "Participation Rate", color: "#FCD202",markerType: "square"}
+
+                             ]
+                             */
+                        }
+                    }, {
+                        type: "serial",
+                        percentHeight: 20,
+                        marginTop: 10,
+                        showCategoryAxis: true,
+
+                        valueAxes: [{
+                            id: "volumeAxis1",
+                            dashLength: 5
+                        }],
+
+                        categoryAxis: {
+                            dashLength: 5
+                        },
+
+                        stockGraphs: [{
+                            id: "VWAPPerformance",
+                            title: "VWAP 滑点",
+                            valueField: "VWAPPerformance",
+                            periodValue: "Average",
+                            type: "column",
+                            fixedColumnWidth: 3,
+                            useDataSetColors: false,
+                            lineColor: "#666",
+                            fillColors: "#FF6600",
+                            fillAlphas: 1,
+                            valueAxis: "volumeAxis1",
+                            legendColor: "#FF6600"
+                        }],
+
+                        stockLegend: {
+
+                            /*   data:[
+                             {title: "VWAP Performance", color: "#FF6600",markerType: "square"}
+                             ]
+                             */
+                        }
+                    }, {
+                        type: "serial",
+                        percentHeight: 20,
+                        marginTop: 10,
+                        showCategoryAxis: true,
+
+                        valueAxes: [{
+                            id: "volumeAxis1",
+                            dashLength: 5
+                        }],
+
+                        categoryAxis: {
+                            dashLength: 5
+                        },
+
+                        stockGraphs: [{
+
+                            id: "arrivalPerformance",
+                            title: "到达价格滑点",
+                            valueField: "arrivalPerformance",
+                            periodValue: "Average",
+                            type: "column",
+                            fixedColumnWidth: 3,
+                            useDataSetColors: false,
+                            lineColor: "#666",
+                            fillColors: "#FF6600",
+                            fillAlphas: 1,
+                            valueAxis: "volumeAxis1",
+                            legendColor: "#FF6600"
+                        }],
+
+                        stockLegend: {
+
+                            /*   data:[
+                             {title: "Arrival Performance", color: "#FF6600",markerType: "square"}
+                             ]
+                             */
+                        }
+                    }],
+
+                chartScrollbarSettings: {
+                    position: "top",
+                    color: "#00FF00",
+                    backgroundColor: "#555",
+                    selectedBackgroundColor: "#444"
+                },
+
+                chartCursorSettings: {
+                    valueBalloonsEnabled: true,
+                    fullWidth: true,
+                    cursorAlpha: 0.1,
+                    valueLineBalloonEnabled: true,
+                    valueLineEnabled: true,
+                    valueLineAlpha: 0.5
+                },
+
+                periodSelector: {
+                    position: "top",
+                    dateFormat: "YYYY-MM-DD JJ:NN:SS",
+                    inputFieldWidth: 150,
+                    fromText: "从 ",
+                    toText: " 到 ",
+                    periods: [{
+                        period: "hh",
+                        count: 1,
+                        label: "1 hour"
+                    }, {
+                        period: "hh",
+                        count: 2,
+                        label: "2 hours"
+                    }, {
+                        period: "MAX",
+                        label: "MAX",
+                        selected: true
+                    }]
+                }
+            });
+        }
+    }
+
+    function loadHistVolChart() {
+        $.ajax({
+            type: "GET",
+            url: "histVolChartData",
+            dataType: "json",
+            data: {orderID: theOrderID, date: theDate, orderQty: theOrderQty, symbol: theSymbol},
+            beforeSend: ajaxLoading(),
+            success: function (json) {
+                drawHistVolChart(json);
+                chartLoaded[2] = true;
+            },
+            complete: function () {
+                ajaxLoadEnd();
+            }
+        });
+    }
+
+    function drawHistVolChart(chartData) {
+
+        for (var i = 0; i < chartData.length; i++) {
+            chartData[i].time = strToDate(chartData[i].time);
+        }
+        var chart = AmCharts.makeChart("histVol", {
+
+            type: "stock",
+
+            "theme": "light",
+            dataDateFormat: "YYYY-MM-DD JJ:NN:SS",
+            dataSets: [{
+                fieldMappings: [
+                    {
+                        fromField: "time",
+                        toField: "time"
+                    }, {
+                        fromField: "histTickExecutionRate",
+                        toField: "histTickExecutionRate"
+                    }, {
+                        fromField: "todayTickExecutionRate",
+                        toField: "todayTickExecutionRate"
+                    }, {
+                        fromField: "upperBand",
+                        toField: "upperBand"
+                    }, {
+                        fromField: "lowerBand",
+                        toField: "lowerBand"
+                    }, {
+                        fromField: "histTickTradeRate",
+                        toField: "histTickTradeRate"
+                    }, {
+                        fromField: "todayTickTradeRate",
+                        toField: "todayTickTradeRate"
+                    }
+                ],
+                dataProvider: chartData,
+                categoryField: "time"
+            }],
+
+
+            panels: [{
+                showCategoryAxis: true,
+                title: theSymbol,
+                percentHeight: 70,
+                stockGraphs: [{
+                    id: "g1",
+                    title: "历史执行进度曲线 (%)",
+                    lineThickness: 2,
+                    type: "smoothedLine",
+                    valueField: "histTickExecutionRate",
+                    useDataSetColors: false
+                }, {
+                    id: "g2",
+                    title: "当天执行进度曲线 (%)",
+                    lineThickness: 2,
+                    type: "smoothedLine",
+                    valueField: "todayTickExecutionRate",
+                    useDataSetColors: false
+                }, {
+                    id: "g3",
+                    title: "执行进度上限",
+                    lineThickness: 2,
+                    connect: false,
+                    valueField: "upperBand",
+                    useDataSetColors: false
+                }, {
+                    id: "g4",
+                    title: "执行进度下限",
+                    lineThickness: 2,
+                    connect: false,
+                    valueField: "lowerBand",
+                    bullet: "round",
+                    useDataSetColors: false
+                }],
+                stockLegend: {}
+            }, {
+                showCategoryAxis: true,
+                title: theSymbol,
+                percentHeight: 30,
+                stockGraphs: [{
+                    periodValue: "Sum",
+                    id: "g1",
+                    title: "历史交易占比 (%)",
+                    valueField: "histTickTradeRate",
+                    type: "column",
+                    fixedColumnWidth: 5,
+                    cornerRadiusTop: 2,
+                    useDataSetColors: false,
+                    lineAlpha: 0,
+                    fillAlphas: 1,
+                    fillColors: "#FF6600"
+                }, {
+                    periodValue: "Sum",
+                    id: "g2",
+                    title: "当天交易占比 (%)",
+                    valueField: "todayTickTradeRate",
+                    type: "column",
+                    fixedColumnWidth: 5,
+                    cornerRadiusTop: 2,
+                    useDataSetColors: false,
+                    lineAlpha: 0,
+                    fillAlphas: 1,
+                    fillColors: "#FCD202"
+                }],
+                stockLegend: {}
+            }],
+
+
+            categoryAxesSettings: {
+                equalSpacing: true,
+                parseDates: true,
+                minPeriod: "10mm",
+                dashLength: 5
+            },
+            chartScrollbarSettings: {
+                position: "top",
+                color: "#00FF00",
+                backgroundColor: "#555",
+                selectedBackgroundColor: "#444"
+            },
+
+            chartCursorSettings: {
+                valueBalloonsEnabled: true,
+                fullWidth: true,
+                cursorAlpha: 0.1,
+                valueLineBalloonEnabled: true,
+                valueLineEnabled: true,
+                valueLineAlpha: 0.5
+            },
+            periodSelector: {
+                position: "top",
+                dateFormat: "YYYY-MM-DD JJ:NN:SS",
+                inputFieldWidth: 150,
+                periods: [{
+                    period: "hh",
+                    count: 1,
+                    label: "1 hour"
+                }, {
+                    period: "hh",
+                    count: 2,
+                    label: "2 hours"
+                }, {
+                    period: "MAX",
+                    label: "MAX"
+                }
+                ]
+            }
+        });
+    }
+
+    function loadChart(index) {
+        switch (index) {
+            case 0:
+                loadBubbleChart();
+                break;
+            case 1:
+                loadHistVolChart();
+                break;
+        }
+    }
+
+    function side_format(value, record, index) {
+        if (value.toUpperCase() == "BUY" || value == "买入") {
+            return '<span style="color:red;font-weight: bold">' + value + '</span>';
+        } else {
+            return '<span style="color:green;font-weight: bold">' + value + '</span>';
+        }
+
+    }
+
+    function getOrderInfo() {
+        $('#orderGrid').datagrid({
+            url: "orderSingleJSON",
+            queryParams: {
+                orderID: theOrderID,
+                date: theDate,
+                symbol: theSymbol
+            },
+            loadMsg: 0,
+            singleSelect: false,
+            method: 'get',
+            async: false,
+
+            onBeforeLoad: ajaxLoading(),
+            onLoadSuccess: function (data) {
+                if (data.total == 0) {
+                    alert("母单信息不存在");
+                } else {
+                    theOrderQty = data.rows[0].orderQty;
+                    theSymbol = data.rows[0].symbol;
+                    theParRate = data.rows[0].parRate;
+                    theSide = data.rows[0].side;
+                    theStrategyStyle = data.rows[0].strategyStyle;
+                    theStrategyName = data.rows[0].strategyName;
+                }
+                initChartLoadArray();
+                var tab = $('#orderDiagram').tabs('getSelected');
+                var index = $('#orderDiagram').tabs('getTabIndex', tab);
+
+                loadChart(index);
+                ajaxLoadEnd();
+            }
+
+        });
+    }
+
+    getOrderInfo()
+
+</script>
+
+<script>
+    $(function () {
+        $('#orderDiagram').tabs({
+            onSelect: function (title, index) {
+                if (theOrderID != "") {
+                    if (!chartLoaded[index]) {
+                        loadChart(index);
+                    }
+                }
+            }
+        })
+
+    })
+
+
+</script>
+</body>
+</html>

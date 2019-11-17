@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/black/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="easyui/demo/demo.css">
+    <script type="text/javascript" src="easyui/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+    <link rel="stylesheet" href="amstockchart_3.21.6/amcharts/style.css" type="text/css">
+    <script src="amstockchart_3.21.6/amcharts/amcharts.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/serial.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/amstock.js" type="text/javascript"></script>
+    <script src="amstockchart_3.21.6/amcharts/themes/dark.js" type="text/javascript"></script>
+</head>
+<body>
+<div style="margin:20px 0;"></div>
+<div id="mainLayout" class="easyui-layout" style="width:100%;height:1150px;">
+    <div data-options="region:'north',title:'欢迎使用金纳算法交易可视化平台'" style="height:50px">
+        请选择交易日期: <input id="dateSelection">
+    </div>
+    <div id="navigationPanel" data-options="region:'west',split:true" title="策略指令列表" style="width:240px;">
+        <ul id="navigator" class="easyui-tree">
+        </ul>
+    </div>
+    <div id="mainPanel" data-options="region:'center',title:'策略指令信息'">
+        <div id="orderLayout" class="easyui-layout" style="height:1100px;">
+            <div id="orderPanel" data-options="region:'north'" style="height:80px">
+                <table class="easyui-datagrid" id="orderGrid" style="width:1550px;height:750px"
+                       data-options="singleSelect:true,method:'get',async:false">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'orderId',width:130">Order ID</th>
+                        <th data-options="field:'status',width:100">Status</th>
+                        <th data-options="field:'symbol',width:100">Symbol</th>
+                        <th data-options="field:'side',width:50">Side</th>
+                        <th data-options="field:'orderQty',width:100">OrderQty</th>
+                        <th data-options="field:'orderPrice',width:80">Price</th>
+                        <th data-options="field:'execQty',width:130">CumQty</th>
+                        <th data-options="field:'execPrice',width:100">AvgPx</th>
+                        <th data-options="field:'execPercent',width:170">Executed(%)</th>
+                        <th data-options="field:'strategyName',width:100">Strategy</th>
+                        <th data-options="field:'orderStartTime',width:120">Start Time</th>
+                        <th data-options="field:'orderEndTime',width:120">End Time</th>
+                        <th data-options="field:'strategyStyle',width:130">Style</th>
+                        <th data-options="field:'parRate',width:130">Participation Rate</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="orderDiagram" class="easyui-tabs" data-options="region:'center',title:'策略指令执行图解'">
+                <div id="bubbleChartPanel" title="Algo Bubble Chart" data-options="iconCls:'icon-reload'"
+                     style="padding:10px;">
+                    <div id="bubble" style="width:100%; height:780px;"></div>
+                </div>
+                <div id="vwapChartPanel" title="VWAP Execution Chart" data-options="iconCls:'icon-reload'"
+                     style="padding:10px">
+                    <div id="vwap" style="width:100%; height:780px;"></div>
+                </div>
+
+                <div id="histVolPanel" title="HistVol Execution Chart" data-options="iconCls:'icon-reload'"
+                     style="padding:10px">
+                    <div id="histVol" style="width:100%; height:780px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var theDate = "";
+    var theOrderID = "";
+    var theOrderQty = "";
+    var theSymbol = "";
+    var chartLoaded = [];
+    var theParRate;
+
+    initChartLoadArray();
+
+    function initChartLoadArray() {
+        var arrayLength = chartLoaded.length;
+        for (var i = 0; i < arrayLength; i++) {
+            chartLoaded[i] = false;
+        }
+    }
+
+    function ajaxLoading() {
+        $("<div class=\"datagrid-mask\"></div>").css({
+            display: "block",
+            width: "100%",
+            height: $(window).height()
+        }).appendTo("body");
+        $("<div class=\"datagrid-mask-msg\"></div>").html("正在处理，请稍候。。。").appendTo("body").css({
+            display: "block",
+            left: ($(document.body).outerWidth(true) - 190) / 2,
+            top: ($(window).height() - 45) / 2
+        });
+    }
+
+    function ajaxLoadEnd() {
+        $(".datagrid-mask").remove();
+        $(".datagrid-mask-msg").remove();
+    }
+
+</script>
+
+
+<script>
+
+    function padZero(number) {
+        if (number < 10) return "0" + number;
+        else return "" + number;
+    }
+
+    function loadChart(index) {
+        switch (index) {
+            case 0:
+                loadBubbleChart();
+                break;
+            case 1:
+                loadVWAPChart();
+                break;
+            case 2:
+                loadHistVolChart();
+                break;
+        }
+    }
+
+    function loadBubbleChart() {
+        $.ajax({
+            type: "GET",
+            url: "bubbleChartData",
+            dataType: "json",
+            data: {orderID: theOrderID, date: theDate, symbol: theSymbol, orderQty: theOrderQty},
+            beforeSend: ajaxLoading(),
+            success: function (json) {
+                drawBubbleChart(json);
+                chartLoaded[0] = true;
+            },
+            complete: function () {
+                ajaxLoadEnd();
+            }
+        });
+    }
+
+    function drawBubbleChart(chartData) {
+
+        var orderData = [];
+        var bSize = 10;
+        var color;
+        var arrayLength = chartData.length;
+
+        var date = theDate.substring(0, 4) + "-" + theDate.substring(4, 6) + "-" + theDate.substring(6, 8);
+
+        var largestOrderQty = 1;
+        var smallestOrderQty = 1;
+        if (arrayLength == 0) {
+            alert("没有行情信息或没有委托信息");
+        } else {
+
+            for (var i = 0; i < arrayLength; i++) {
+                chartData[i].time = date + " " + chartData[i].time;
+                if ("orderPrice" in chartData[i]) {
+                    var orderQty = parseInt(chartData[i].orderVolume);
+                    if (largestOrderQty == 1) largestOrderQty = orderQty;
+                    if (smallestOrderQty == 1) smallestOrderQty = orderQty;
+
+                    if (orderQty > largestOrderQty) largestOrderQty = orderQty;
+                    if (orderQty < smallestOrderQty) smallestOrderQty = orderQty;
+                }
+            }
+
+            for (var i = 0; i < arrayLength; i++) {
+                if ("orderPrice" in chartData[i]) {
+
+                    switch (chartData[i].orderStatus) {
+                        case "NEW":
+                            color = "#00CC00";
+                            break;
+                        case "PARTIALLY_FILLED":
+                            color = "#CC00CC";
+                            break;
+                        case "FILLED":
+                            color = "#CC0000";
+                            break;
+                        case "CANCELED":
+                            color = "#CCCCCC";
+                            break;
+                        default:
+                            color = "#00CC00";
+                    }
+
+                    orderData.push({
+                        date: chartData[i].time,
+                        value: chartData[i].orderPrice,
+                        backgroundColor: color,
+                        rollOverColor: color,
+                        fontSize: Math.max(Math.floor((parseInt(chartData[i].orderVolume) / (largestOrderQty + smallestOrderQty)) * 24), 4),
+                        text: "",
+                        description: chartData[i].orderDescription,
+                        type: "round",
+                        graph: "bubbleMain"
+                    });
+                }
+            }
+        }
+        var chart = AmCharts.makeChart("bubble", {
+            type: "stock",
+            theme: "light",
+            dataDateFormat: "YYYY-MM-DD JJ:NN:SS",
+            balloon: {
+                textAlign: "left",
+                fadeOutDuration: 0.5
+            },
+
+            categoryAxesSettings: {
+                minPeriod: "ss",
+                balloon: {
+                    enabled: false
+                }
+            },
+
+            dataSets: [{
+                fieldMappings: [{
+                    fromField: "marketPrice",
+                    toField: "marketPrice"
+                }, {
+                    fromField: "parRate",
+                    toField: "parRate"
+                }, {
+                    fromField: "bubbleCumQty",
+                    toField: "bubbleCumQty"
+                }, {
+                    fromField: "execRate",
+                    toField: "execRate"
+                }, {
+                    fromField: "marketVWAPPrice",
+                    toField: "marketVWAPPrice"
+                }],
+                dataProvider: chartData,
+                categoryField: "time",
+                stockEvents: orderData
+            }],
+
+            panels: [{
+                title: theSymbol,
+                percentHeight: 80,
+                valueAxes: [
+                    {
+                        id: "priceAxis1",
+                        minMaxMultiplier: 1,
+                        balloon: {
+                            enabled: false
+                        }
+                    },
+                    {
+                        id: "priceAxis2",
+                        position: "right"
+                    }
+                ],
+
+                stockGraphs: [{
+                    id: "bubbleMain",
+                    title: "Last Price",
+                    valueField: "marketPrice",
+                    type: "smoothedLine",
+                    lineThickness: 3,
+                    lineAlpha: 0.7,
+                    useDataSetColors: false,
+                    bullet: "round",
+                    valueAxis: "priceAxis1"
+                }, {
+                    id: "bubbleVWAP",
+                    title: "Market VWAP",
+                    valueField: "marketVWAPPrice",
+                    type: "smoothedLine",
+                    lineThickness: 3,
+                    lineAlpha: 0.7,
+                    useDataSetColors: false,
+                    bullet: "round",
+                    valueAxis: "priceAxis1"
+                }, {
+                    id: "bubbleExecRate",
+                    title: "Execution Rate",
+                    valueField: "execRate",
+                    type: "line",
+                    lineThickness: 3,
+                    lineAlpha: 0.7,
+                    useDataSetColors: false,
+                    bullet: "round",
+                    valueAxis: "priceAxis2"
+                }],
+                stockLegend: {}
+            },
+                {
+//                  title: "Volume",
+                    type: "serial",
+                    percentHeight: 20,
+                    marginTop: 10,
+                    showCategoryAxis: true,
+
+                    valueAxes: [{
+                        id: "volumeAxis1",
+                        dashLength: 5
+                    },
+                        {
+                            id: "volumeAxis2",
+                            position: "right",
+//                            maximum: theParRate,
+                            minimum: 0,
+                            strictMinMax: false
+                        }],
+
+                    categoryAxis: {
+                        dashLength: 5
+                    },
+
+                    stockGraphs: [{
+                        id: "bubbleCumQty",
+                        periodValue: "Sum",
+                        title: "Cumulative Quantity",
+                        valueField: "bubbleCumQty",
+                        type: "column",
+                        columnWidth: 0.3,
+                        useDataSetColors: false,
+                        fillAlphas: 1,
+                        bullet: "round",
+                        valueAxis: "volumeAxis1"
+                    },
+                        {
+                            id: "bubbleParRate",
+                            title: "Participation Rate",
+                            valueField: "parRate",
+                            type: "line",
+                            useDataSetColors: false,
+                            lineThickness: 2,
+                            bullet: "round",
+                            valueAxis: "volumeAxis2"
+                        }],
+
+                    stockLegend: {}
+                }],
+
+            chartScrollbarSettings: {
+                color: "#00FF00",
+                backgroundColor: "#AAAAAA",
+                selectedBackgroundColor: "#666666"
+            },
+
+            chartCursorSettings: {
+                valueBalloonsEnabled: true,
+                fullWidth: true,
+                cursorAlpha: 0.1,
+                valueLineBalloonEnabled: true,
+                valueLineEnabled: true,
+                valueLineAlpha: 0.5
+            },
+
+            periodSelector: {
+                position: "bottom",
+                dateFormat: "YYYY-MM-DD JJ:NN:SS",
+                inputFieldWidth: 150,
+                periods: [{
+                    period: "hh",
+                    count: 1,
+                    label: "1 hour"
+                }, {
+                    period: "hh",
+                    count: 2,
+                    label: "2 hours"
+                }, {
+                    period: "MAX",
+                    label: "MAX",
+                    selected: true
+                }]
+            }
+        });
+    }
+
+    function loadVWAPChart() {
+
+        $.ajax({
+            type: "GET",
+            url: "vwapChartData",
+            dataType: "json",
+            data: {orderID: theOrderID, date: theDate, orderQty: theOrderQty, symbol: theSymbol},
+            beforeSend: ajaxLoading(),
+            success: function (json) {
+                drawVWAPChart(json);
+                chartLoaded[1] = true;
+            },
+            complete: function () {
+                ajaxLoadEnd();
+            }
+        });
+    }
+
+    function drawVWAPChart(chartData) {
+
+        var chart = AmCharts.makeChart("vwap", {
+            type: "stock",
+            theme: "light",
+            dataDateFormat: "YYYY-MM-DD JJ:NN:SS",
+            categoryAxesSettings: {
+                minPeriod: "ss"
+            },
+            dataSets: [{
+                fieldMappings: [{
+                    fromField: "time",
+                    toField: "time"
+                }, {
+                    fromField: "executionRate",
+                    toField: "executionRate"
+                }, {
+                    fromField: "upperBand",
+                    toField: "upperBand"
+                }, {
+                    fromField: "lowerBand",
+                    toField: "lowerBand"
+                }, {
+                    fromField: "orderRate",
+                    toField: "orderRate"
+                }],
+                dataProvider: chartData,
+                categoryField: "time"
+            }],
+
+            panels: [{
+                showCategoryAxis: true,
+                title: theSymbol,
+                percentHeight: 70,
+                stockGraphs: [{
+                    id: "g1",
+                    title: "Execution Rate",
+                    lineThickness: 2,
+                    valueField: "executionRate",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g2",
+                    title: "Upper Band",
+                    lineThickness: 2,
+                    valueField: "upperBand",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g3",
+                    title: "Lower Band",
+                    lineThickness: 2,
+                    valueField: "lowerBand",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g4",
+                    title: "Order Rate",
+                    lineThickness: 2,
+                    valueField: "orderRate",
+                    bullet: "round",
+                    useDataSetColors: false
+                }],
+                stockLegend: {}
+            }],
+
+            chartScrollbarSettings: {
+                //       graph: "g1"
+            },
+
+            chartCursorSettings: {
+                valueBalloonsEnabled: true,
+                fullWidth: true,
+                cursorAlpha: 0.1,
+                valueLineBalloonEnabled: true,
+                valueLineEnabled: true,
+                valueLineAlpha: 0.5
+            },
+
+            periodSelector: {
+                position: "bottom",
+                dateFormat: "YYYY-MM-DD JJ:NN:SS",
+                inputFieldWidth: 150,
+                periods: [{
+                    period: "hh",
+                    count: 1,
+                    label: "1 hour",
+                    selected: true
+                }, {
+                    period: "hh",
+                    count: 2,
+                    label: "2 hours"
+                }, {
+                    period: "hh",
+                    count: 5,
+                    label: "5 hour"
+                }, {
+                    period: "MAX",
+                    label: "MAX"
+                }]
+            },
+
+            export: {
+                enabled: true
+            }
+        });
+    }
+
+    function loadHistVolChart() {
+
+        $.ajax({
+            type: "GET",
+            url: "histVolChartData",
+            dataType: "json",
+            data: {orderID: theOrderID, date: theDate, orderQty: theOrderQty, symbol: theSymbol},
+            beforeSend: ajaxLoading(),
+            success: function (json) {
+                drawHistVolChart(json);
+                chartLoaded[2] = true;
+            },
+            complete: function () {
+                ajaxLoadEnd();
+            }
+        });
+    }
+
+    function drawHistVolChart(chartData) {
+        var chart = amcore.create();
+        var chart = AmCharts.makeChart("histVol", {
+            type: "stock",
+            theme: "light",
+            dataDateFormat: "YYYYMMDD-JJ:NN:SS",
+            categoryAxesSettings: {
+                minPeriod: "ss",
+                equalSpacing: true
+
+            },
+            dataSets: [{
+                fieldMappings: [{
+                    fromField: "time",
+                    toField: "time"
+                }, {
+                    fromField: "histTickExecutionRate",
+                    toField: "histTickExecutionRate"
+                }, {
+                    fromField: "todayTickExecutionRate",
+                    toField: "todayTickExecutionRate"
+                }, {
+                    fromField: "upperBand",
+                    toField: "upperBand"
+                }, {
+                    fromField: "lowerBand",
+                    toField: "lowerBand"
+                }, {
+                    fromField: "histTickTradeRate",
+                    toField: "histTickTradeRate"
+                }, {
+                    fromField: "todayTickTradeRate",
+                    toField: "todayTickTradeRate"
+                }
+                ],
+                dataProvider: chartData,
+                categoryField: "time"
+            }],
+
+            panels: [{
+                showCategoryAxis: true,
+                title: theSymbol,
+                percentHeight: 70,
+                stockGraphs: [{
+                    id: "g1",
+                    title: "histTickExecutionRate",
+                    lineThickness: 2,
+                    valueField: "histTickExecutionRate",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g2",
+                    title: "todayTickExecutionRate",
+                    lineThickness: 2,
+                    valueField: "todayTickExecutionRate",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g3",
+                    title: "upperBand",
+                    lineThickness: 2,
+                    valueField: "upperBand",
+                    bullet: "round",
+                    useDataSetColors: false
+                }, {
+                    id: "g4",
+                    title: "lowerBand",
+                    lineThickness: 2,
+                    valueField: "lowerBand",
+                    bullet: "round",
+                    useDataSetColors: false
+                }],
+                stockLegend: {}
+            }, {
+                showCategoryAxis: true,
+                title: theSymbol,
+                percentHeight: 30,
+                stockGraphs: [{
+                    periodValue: "Sum",
+                    id: "g1",
+                    title: "histTickTradeRate",
+                    valueField: "histTickTradeRate",
+                    type: "column",
+                    columnWidth: 0.2,
+                    cornerRadiusTop: 2,
+                    useDataSetColors: false,
+                    lineAlpha: 0,
+                    fillColors: "#FF6600",
+                    fillAlphas: 1
+                }, {
+                    periodValue: "Sum",
+                    id: "g2",
+                    title: "todayTickTradeRate",
+                    valueField: "todayTickTradeRate",
+                    type: "column",
+                    columnWidth: 0.2,
+                    cornerRadiusTop: 2,
+                    useDataSetColors: false,
+                    lineAlpha: 0,
+                    fillAlphas: 1,
+                    fillColors: "#FCD202"
+
+                }],
+                stockLegend: {}
+            }],
+
+            chartScrollbarSettings: {
+                color: "#00FF00",
+                backgroundColor: "#AAAAAA",
+                selectedBackgroundColor: "#666666"
+            },
+
+            chartCursorSettings: {
+                valueBalloonsEnabled: true,
+                fullWidth: true,
+                cursorAlpha: 0.1,
+                valueLineBalloonEnabled: true,
+                valueLineEnabled: true,
+                valueLineAlpha: 0.5
+            },
+
+            periodSelector: {
+                position: "bottom",
+                dateFormat: "YYYYMMDD-JJ:NN:SS",
+                inputFieldWidth: 150,
+                periods: [{
+                    period: "hh",
+                    count: 1,
+                    label: "1 hour",
+                    selected: true
+                }, {
+                    period: "hh",
+                    count: 2,
+                    label: "2 hours"
+                }, {
+                    period: "hh",
+                    count: 5,
+                    label: "5 hour"
+                }, {
+                    period: "MAX",
+                    label: "MAX"
+                }]
+            },
+
+            export: {
+                enabled: true
+            }
+        });
+    }
+</script>
+
+<script>
+
+    $(function () {
+        $('#dateSelection').datebox().datebox('calendar').calendar({
+            validator: function (date) {
+                var now = new Date();
+                var d1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+                var d2 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                return d1 <= date && date <= d2;
+            }
+        });
+    });
+
+    $('#dateSelection').datebox({
+        onSelect: function (date) {
+            theDate = date.getFullYear() + padZero(date.getMonth() + 1) + padZero(date.getDate());
+            $('#navigator').tree({
+                method: "POST",
+                url: "orderTreeJSON",
+                queryParams: {
+                    date: theDate
+                },
+                onBeforeLoad: function (node, param) {
+                    ajaxLoading();
+                },
+                onLoadSuccess: function (node, data) {
+                    ajaxLoadEnd();
+                    $('#navigator').tree('collapseAll');
+                }
+            });
+        }
+    });
+
+    $('#navigator').tree({
+        lines: true,
+        onClick: function (node) {
+            if (node.attributes.nodetype == 'order') {
+                theOrderID = node.id;
+                $('#orderGrid').datagrid({
+                    url: "orderJSON",
+                    queryParams: {
+                        orderID: theOrderID,
+                        date: theDate,
+                        symbol: node.attributes.parentnode
+                    },
+                    onLoadSuccess: function (data) {
+                        theOrderQty = data.rows[0].orderQty;
+                        theSymbol = data.rows[0].symbol;
+                        theParRate = data.rows[0].parRate;
+                        initChartLoadArray();
+
+                        var tab = $('#orderDiagram').tabs('getSelected');
+                        var index = $('#orderDiagram').tabs('getTabIndex', tab);
+                        // the corresponding tab object
+                        if (theSymbol == "") {
+                            theSymbol = node.attributes.parentnode;
+                        }
+
+                        loadChart(index);
+                    }
+                });
+
+
+            }
+        }
+    });
+
+    $('#orderDiagram').tabs({
+        onSelect: function (title, index) {
+            if (theOrderID != "") {
+                if (!chartLoaded[index]) {
+                    loadChart(index);
+                }
+            }
+        }
+    });
+
+</script>
+</body>
+</html>

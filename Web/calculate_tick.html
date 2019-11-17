@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<head>
+    <title>calcualte strategy price.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <link rel="stylesheet" type="text/css" href="easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="easyui/demo/demo.css">
+    <script type="text/javascript" src="easyui/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="easyui/jquery.easyui.min.js"></script>
+
+    <style type="text/css">
+        body {
+            background-color: #999;
+        }
+
+        table {
+            margin: 1px auto;
+            margin-top: 10%;
+        }
+
+        tr td {
+            border-bottom: 1px solid #e6e6e6;
+            padding: 5px 5px 5px 5px;
+            line-height: 22px;
+            word-break: break-all;
+            background: #ecf6fc;
+            width: 150px;
+            height: 30px;
+        }
+
+        tr.over td {
+            background: #bcd4ec; /*这个将是鼠标高亮行的背景色*/
+        }
+
+        label {
+            font-weight: bolder;
+        }
+
+        label, td {
+            font-size: 16px;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+
+        function validate_symbol() {
+
+            var symbol = document.getElementById("symbol");
+            var re = new RegExp("^[0-9]{5,6}\\.[A-Z]{2}$");
+            if (re.test(symbol.value)) {
+                return true;
+            } else {
+                alert("证券代码不正确");
+                symbol.focus();
+                return false;
+            }
+        }
+
+        function validate_time() {
+            var begin_time = document.getElementById("begin_time");
+            var end_time = document.getElementById("end_time");
+            var re = new RegExp("^[0-1][0-9]([0-5][0-9]){2}$");
+
+            if (begin_time.value.replace(/^\s+|\s+$/g, "") != "") {
+                if (!re.test(begin_time.value)) {
+                    alert("开始时间格式不正确");
+                    begin_time.focus();
+                    return false;
+                }
+            }
+            if (begin_time.value.replace(/^\s+|\s+$/g, "") != "") {
+                if (!re.test(end_time.value)) {
+                    alert("结束时间格式不正确");
+                    end_time.focus();
+                    return false;
+                }
+            }
+            if ((begin_time.value.replace(/^\s+|\s+$/g, "")) != (end_time.value.replace(/^\s+|\s+$/g, ""))) {
+
+                if (parseInt(begin_time.value.replace(/^\s+|\s+$/g, "")) > parseInt(end_time.value.replace(/^\s+|\s+$/g, ""))) {
+                    alert("起始时间不能早于结束时间");
+                    begin_time.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function validate_price() {
+            var price = document.getElementById("price");
+            var type = document.getElementById("type");
+
+            if (price.value.replace(/^\s+|\s+$/g, "") == "" && type.value.replace(/^\s+|\s+$/g, "") != "") {
+                alert("买卖方向和买卖价格必须同时存在");
+                return false;
+            }
+
+            if (price.value.replace(/^\s+|\s+$/g, "") != "" && type.value.replace(/^\s+|\s+$/g, "") == "") {
+                alert("买卖方向和买卖价格必须同时存在");
+                return false;
+            }
+            if (price.value.replace(/^\s+|\s+$/g, "") == "") {
+                return true;
+            } else {
+                re = new RegExp("^[0-9]+(\\.[0-9]+)?$");
+                if (re.test(price.value)) {
+                    return true;
+                } else {
+                    alert("买卖价格不正确");
+                    price.focus();
+                    return false;
+                }
+            }
+        }
+
+        function validate() {
+            return validate_symbol() && validate_time() && validate_price();
+        }
+
+    </script>
+
+
+</head>
+<body>
+
+<table>
+    <tr>
+        <td colspan=4 align="center" style="font-weight:bold">计算成交均价</td>
+    </tr>
+    <tr>
+        <td>
+            <label>策略类型:</label>
+        </td>
+        <td colspan=3>
+            <label>VWAP</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>证券代码:</label>
+        </td>
+        <td>
+            <input type="text" name="symbol" id="symbol" required/>
+        </td>
+        <td>
+            <label>日期:</label>
+        </td>
+        <td>
+            <input id="date" class="easyui-datebox" required/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>开始时间:</label>
+        </td>
+        <td>
+            <input type="text" name="begin_time" id="begin_time"/>
+        </td>
+        <td>
+            <label>结束时间:</label>
+        </td>
+        <td>
+            <input type="text" name="end_time" id="end_time"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>买卖类型:</label>
+        </td>
+        <td>
+            <select name="type" id="type" style="width:50px;">
+                <option value=""></option>
+                <option value="buy">买</option>
+                <option value="sell">卖</option>
+            </select>
+        </td>
+        <td>
+            <label>买卖价格:</label>
+        </td>
+        <td>
+            <input type="text" name="price" id="price"/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=4 align="right">
+            <input type="button" onclick="calculate()" value="开始计算"/></td>
+    </tr>
+    <tr>
+        <td colspan=3 align="right">
+            成交均价为:
+        </td>
+        <td><label id="vwapPrice"></label></td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    function initialDate() {
+        var t = new Date();
+        var day = t.getDay();
+        if (day == 0)
+            t -= 2 * 24 * 60 * 60 * 1000;
+        if (day == 6)
+            t -= 24 * 60 * 60 * 1000;
+        tStr = String(t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate());
+        $("#date").datebox("setValue", tStr);
+
+    }
+
+</script>
+<script type="text/javascript">
+
+    $('#date').datebox({
+        formatter: function (date) {
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            var d = date.getDate();
+            return y + '-' + (m < 10 ? ('0' + m) : m) + '-' + (d < 10 ? ('0' + d) : d);
+        },
+        parser: function (s) {
+            if (!s) {
+                return new Date();
+            }
+            var ss = s.split("-");
+            var y = parseInt(ss[0], 10);
+            var m = parseInt(ss[1], 10);
+            var d = parseInt(ss[2], 10);
+
+            if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                return new Date(y, m - 1, d);
+            } else {
+                return new Date();
+            }
+        }
+    });
+
+    window.onload = function () {
+        initialDate();
+    };
+
+    function calculate() {
+        if (validate()) {
+            $.ajax({
+                type: "GET",
+                url: "getVWAPPrice",
+                async: false,
+                data: {
+                    symbol: $("#symbol").val(),
+                    date: $('#date').datebox('getValue'),
+                    begin_time: $("#begin_time").val(),
+                    end_time: $("#end_time").val(),
+                    type: $("#type").val(),
+                    price: $("#price").val()
+                },
+                success: function (json) {
+                    document.getElementById("vwapPrice").innerHTML = json.price;
+                }
+            });
+        }
+
+    }
+
+</script>
+</body>
+</html>
