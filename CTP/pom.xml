@@ -2,16 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>GenusOwn</artifactId>
+        <groupId>com.genus.xs</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.genus.xs</groupId>
-    <artifactId>GenusOwn</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>Scoket</module>
-        <module>CTP</module>
-    </modules>
+    <artifactId>CTP</artifactId>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -25,17 +23,17 @@
     </properties>
     <dependencies>
 
-        <!-- <dependency>
-             <groupId>org.apache.logging.log4j</groupId>
-             <artifactId>log4j-core</artifactId>
-             <version>${log4j2.version}</version>
-         </dependency>
-         <dependency>
-             <groupId>org.apache.logging.log4j</groupId>
-             <artifactId>log4j-api</artifactId>
-             <version>${log4j2.version}</version>
-         </dependency>
- -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
