@@ -1,0 +1,371 @@
+<ExchangeSessionsConfig>
+    <entry>
+        <Market>SS</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:15:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:20:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:20:00" closeTime="09:25:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase3" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="12:55:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="12:55:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+            <SessionsConfig instrumentType="Equity">
+                <amPreOpenTime>09:15:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:20:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:20:00" closeTime="09:25:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase3" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="14:57:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuction" sessionType="CloseAuction" openTime="14:57:00" closeTime="15:00:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+            <SessionsConfig instrumentType="Repo">
+                <amPreOpenTime>09:15:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:30:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:20:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:20:00" closeTime="09:25:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase3" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="15:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:30:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>SZ</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:15:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:20:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:20:00" closeTime="09:25:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase3" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="14:57:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuction" sessionType="CloseAuction" openTime="14:57:00" closeTime="15:00:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+            <SessionsConfig instrumentType="Repo">
+                <amPreOpenTime>09:15:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:30:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:20:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:20:00" closeTime="09:25:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase3" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="15:27:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuction" sessionType="CloseAuction" openTime="15:27:00" closeTime="15:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:30:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>HS</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:00:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>12:00:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>16:10:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:00:00" closeTime="09:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:30:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="12:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="12:00:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="16:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuctionPhase1" sessionType="CloseAuction" openTime="16:00:00" closeTime="16:01:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase2" sessionType="CloseAuction" openTime="16:01:00" closeTime="16:06:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase3" sessionType="CloseAuction" openTime="16:06:00" closeTime="16:10:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="16:10:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>HZ</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:00:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>12:00:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>16:10:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:00:00" closeTime="09:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:30:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="12:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="12:00:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="16:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuctionPhase1" sessionType="CloseAuction" openTime="16:00:00" closeTime="16:01:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase2" sessionType="CloseAuction" openTime="16:01:00" closeTime="16:06:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase3" sessionType="CloseAuction" openTime="16:06:00" closeTime="16:10:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="16:10:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>HK</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:00:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>12:00:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>16:10:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:00:00" closeTime="09:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:15:00" closeTime="09:30:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="12:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="12:00:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="16:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuctionPhase1" sessionType="CloseAuction" openTime="16:00:00" closeTime="16:01:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase2" sessionType="CloseAuction" openTime="16:01:00" closeTime="16:06:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="CloseAuctionPhase3" sessionType="CloseAuction" openTime="16:06:00" closeTime="16:10:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="16:10:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>TW</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>08:30:00</amPreOpenTime>
+                <amOpenTime>09:00:00</amOpenTime>
+                <amCloseTime>13:30:00</amCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="08:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="08:30:00" closeTime="09:00:00" isTradable="true" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:00:00" closeTime="13:25:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="CloseAuction" sessionType="CloseAuction" openTime="13:25:00" closeTime="13:30:00" isTradable="true" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="13:30:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>CF</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:25:00</amPreOpenTime>
+                <amOpenTime>09:30:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:25:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:25:00" closeTime="09:29:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:29:00" closeTime="09:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>CF2</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>09:10:00</amPreOpenTime>
+                <amOpenTime>09:15:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>12:55:00</pmPreOpenTime>
+                <pmOpenTime>13:00:00</pmOpenTime>
+                <pmCloseTime>15:15:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="09:10:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase1" sessionType="OpenAuction" openTime="09:10:00" closeTime="09:14:00" isTradable="true" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="true"/>
+                    <session sessionKey="OpenAuctionPhase2" sessionType="OpenAuction" openTime="09:14:00" closeTime="09:15:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="09:15:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:00:00" isTradable="false" isCancellable="false" isAmendable="false"
+                             isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:00:00" closeTime="15:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:15:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>SSC</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>08:55:00</amPreOpenTime>
+                <amOpenTime>09:00:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>13:25:00</pmPreOpenTime>
+                <pmOpenTime>13:30:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="08:55:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="AMOpenAuction" sessionType="OpenAuction" openTime="08:55:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingAM1" sessionType="ContTrading" openTime="09:00:00" closeTime="10:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak1" sessionType="IntraDayClose" openTime="10:15:00" closeTime="10:30:00" isTradable="false" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="ContTradingAM2" sessionType="ContTrading" openTime="10:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak2" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:25:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="13:25:00" closeTime="13:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:30:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>DLC</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>08:55:00</amPreOpenTime>
+                <amOpenTime>09:00:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>13:25:00</pmPreOpenTime>
+                <pmOpenTime>13:30:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="08:55:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase" sessionType="OpenAuction" openTime="08:55:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingAM1" sessionType="ContTrading" openTime="09:00:00" closeTime="10:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak1" sessionType="IntraDayClose" openTime="10:15:00" closeTime="10:30:00" isTradable="false" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="ContTradingAM2" sessionType="ContTrading" openTime="10:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak2" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:25:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="13:25:00" closeTime="13:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:30:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>ZZC</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>08:55:00</amPreOpenTime>
+                <amOpenTime>09:00:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>13:25:00</pmPreOpenTime>
+                <pmOpenTime>13:30:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="08:55:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase" sessionType="OpenAuction" openTime="08:55:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingAM1" sessionType="ContTrading" openTime="09:00:00" closeTime="10:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak1" sessionType="IntraDayClose" openTime="10:15:00" closeTime="10:30:00" isTradable="false" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="ContTradingAM2" sessionType="ContTrading" openTime="10:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak2" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:25:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="13:25:00" closeTime="13:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:30:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>SE</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>08:55:00</amPreOpenTime>
+                <amOpenTime>09:00:00</amOpenTime>
+                <amCloseTime>11:30:00</amCloseTime>
+                <pmPreOpenTime>13:25:00</pmPreOpenTime>
+                <pmOpenTime>13:30:00</pmOpenTime>
+                <pmCloseTime>15:00:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="08:55:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="OpenAuctionPhase" sessionType="OpenAuction" openTime="08:55:00" closeTime="09:00:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingAM1" sessionType="ContTrading" openTime="09:00:00" closeTime="10:15:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak1" sessionType="IntraDayClose" openTime="10:15:00" closeTime="10:30:00" isTradable="false" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="ContTradingAM2" sessionType="ContTrading" openTime="10:30:00" closeTime="11:30:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak2" sessionType="IntraDayClose" openTime="11:30:00" closeTime="13:25:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="13:25:00" closeTime="13:30:00" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="13:30:00" closeTime="15:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="15:00:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+    <entry>
+        <Market>LMT</Market>
+        <SessionsConfigs>
+            <SessionsConfig instrumentType="Default">
+                <amPreOpenTime>00:00:01</amPreOpenTime>
+                <amOpenTime>00:00:02</amOpenTime>
+                <amCloseTime>12:00:00</amCloseTime>
+                <pmPreOpenTime>12:00:01</pmPreOpenTime>
+                <pmOpenTime>12:00:02</pmOpenTime>
+                <pmCloseTime>23:50:00</pmCloseTime>
+                <sessions>
+                    <session sessionKey="MarketCloseBeforeOpen" sessionType="MarketClose" openTime="00:00:00" closeTime="00:00:01" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="ContTradingAM" sessionType="ContTrading" openTime="00:00:02" closeTime="12:00:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="LunchBreak" sessionType="IntraDayClose" openTime="12:00:00" closeTime="12:00:01" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                    <session sessionKey="PMOpenAuction" sessionType="OpenAuction" openTime="12:00:01" closeTime="12:00:02" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="true"/>
+                    <session sessionKey="ContTradingPM" sessionType="ContTrading" openTime="12:00:02" closeTime="23:50:00" isTradable="true" isCancellable="true" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="true" isAuction="false"/>
+                    <session sessionKey="MarketCloseAfterOpen" sessionType="MarketClose" openTime="23:50:00" closeTime="23:59:59" isTradable="false" isCancellable="false" isAmendable="false" isSupportMarketOrder="false" isSupportLmtOrder="false" isAuction="false"/>
+                </sessions>
+            </SessionsConfig>
+        </SessionsConfigs>
+    </entry>
+</ExchangeSessionsConfig>
