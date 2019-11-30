@@ -6,7 +6,7 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
 from jobs import ConfigChina
-from jobs.GenExchangeSession import ExchangeSessionConfig
+from jobs.GenusExchangeSession import ExchangeSessionConfig
 
 sys.path.append(os.getenv("HOME") + "/Python/monitor")
 
@@ -106,3 +106,30 @@ def testAccuracy():
 # ratio = str(ratio[0: len(ratio) - 3]).strip()
 # ratio=ratio+"%" if not ratio.endswith("%") else ratio
 # print ratio
+
+class Foo(object):
+    def __init__(self, frob, frotz):
+        self.frobnicate = frob
+
+        self.frotz = frotz
+
+        pass
+
+    def init(self, frob, frotz):
+        self.frobnicate = frob
+
+        self.frotz = frotz
+
+
+class Bar(Foo):
+    def init(self, frob, frizzle):
+        super(Bar, self).init(frob, 34)
+
+        self.frazzle = frizzle
+
+
+new = Bar("hello", "world")
+new.init("hello", "world")
+print new.frobnicate
+print new.frazzle
+print new.frotz

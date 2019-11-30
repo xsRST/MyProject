@@ -38,7 +38,7 @@ def data_frame_read_sql(sql):
     pass
 
 
-def getInstrumentList(targetDate, exchnages, instrumentTypes):
+def getInstrumentList(targetDate, exchanges, instrumentTypes):
     querySQL = "select distinct REPLACE( REPLACE(Symbol,'HS','HK'),'HZ','HK') as Symbol ,REPLACE( REPLACE(Exchange,'HS','HK'),'HZ','HK') as Exchange, InstrumentType " \
                "from GenusInstrument where  TheDate ={0} and InstrumentType in (".format(targetDate)
 
@@ -47,7 +47,7 @@ def getInstrumentList(targetDate, exchnages, instrumentTypes):
         querySQL += "'" + instrument_type + "',"
     querySQL = querySQL[0:len(querySQL) - 1]
     querySQL += ")  and Exchange in ( "
-    for exchange in exchnages:
+    for exchange in exchanges:
         if exchange == "HK":
             querySQL += "'HS','HZ','HK',"
             pass

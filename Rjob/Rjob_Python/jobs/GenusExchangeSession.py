@@ -5,10 +5,10 @@ import threading
 import xml.dom.minidom
 
 import pandas as pd
-from jobs import logger
 
 import ConfigChina
 import TimeUtils
+from jobs import logger
 
 Default_str = "Default"
 
@@ -133,7 +133,7 @@ class SessionConfig():
                 openTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("ContTradingAM").closeTime)
                 pass
             closeTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromType("MarketClose").openTime)
-            if timeInt > openTimeSec and timeInt < closeTimeSec:
+            if timeInt >= openTimeSec and timeInt < closeTimeSec:
                 isPMAution = True
                 pass
         except Exception as e:
@@ -144,6 +144,22 @@ class SessionConfig():
         return isPMAution
         pass
 
+    def isPMMarketCloseTimeSec(self, timeInt):
+        lock = threading.Lock()
+        lock.acquire()
+        isPMCloseTime = False
+        try:
+            openTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").openTime)
+            closeTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").closeTime)
+            if timeInt >= openTimeSec and timeInt < closeTimeSec:
+                isPMCloseTime = True
+                pass
+        except Exception as e:
+            logger.write(e)
+        finally:
+            lock.release()
+            pass
+        return isPMCloseTime
         pass
 
     def getAutionTimeSec(self, timeInt):
