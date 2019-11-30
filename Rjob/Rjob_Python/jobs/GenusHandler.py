@@ -74,8 +74,6 @@ class Handler:
         process_symbols = list(set(self.todatyInstrument[ConfigChina.instrument_header_Symbol].tolist()))
         remainHistRawInterVals = AllHistRawInterVal[~AllHistRawInterVal[ConfigChina.instrument_header_Symbol].isin(process_symbols)]
         remainHistRawACVolume = AllHistRawACVolume[~AllHistRawACVolume[ConfigChina.instrument_header_Symbol].isin(process_symbols)]
-        remainHistRawInterVals.reset_index(drop=True, inplace=True)
-        remainHistRawACVolume.reset_index(drop=True, inplace=True)
 
         remainCount = remainHistRawACVolume.shape[0]
         index = 0

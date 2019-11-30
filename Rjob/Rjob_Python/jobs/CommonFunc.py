@@ -60,13 +60,6 @@ def retrieveTickDataFromFile(targetDate, defaultTickFileDirectory, tickFileSuffi
         tickdata = tickdata.dropna()
         tickdata = tickdata.fillna(0)
         tickdata = tickdata[(tickdata[ConfigChina.tick_data_header_asksize] > 0) & (tickdata[ConfigChina.tick_data_header_trdvol] > 0)]
-        tickdata[ConfigChina.tick_data_header_trdvol] = tickdata[ConfigChina.tick_data_header_trdvol].astype('int32')
-        tickdata[ConfigChina.tick_data_header_trdprice] = tickdata[ConfigChina.tick_data_header_trdprice].astype('float32')
-        tickdata[ConfigChina.tick_data_header_acvol] = tickdata[ConfigChina.tick_data_header_acvol].astype('int32')
-        tickdata[ConfigChina.tick_data_header_askprice] = tickdata[ConfigChina.tick_data_header_askprice].astype('float32')
-        tickdata[ConfigChina.tick_data_header_asksize] = tickdata[ConfigChina.tick_data_header_asksize].astype('int32')
-        tickdata[ConfigChina.tick_data_header_bidprice] = tickdata[ConfigChina.tick_data_header_bidprice].astype('float32')
-        tickdata[ConfigChina.tick_data_header_bidsize] = tickdata[ConfigChina.tick_data_header_bidsize].astype('int32')
         tickdata[ConfigChina.header_SpreadSize] = 2000 * ((tickdata[ConfigChina.tick_data_header_askprice] - tickdata[ConfigChina.tick_data_header_bidprice]) / (
                 tickdata[ConfigChina.tick_data_header_askprice] + tickdata[ConfigChina.tick_data_header_bidprice]))
 

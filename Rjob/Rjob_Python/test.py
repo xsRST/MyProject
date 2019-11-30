@@ -6,7 +6,6 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
 from jobs import ConfigChina
-from jobs.GenusExchangeSession import ExchangeSessionConfig
 
 sys.path.append(os.getenv("HOME") + "/Python/monitor")
 
@@ -65,18 +64,24 @@ def testApply():
 
 def testNoDataDeplay():
     data = pd.read_csv("D:\project\Genus\GenusOwn\Rjob\Rjob_Python\output\China-RawIntervalStats20191122", encoding="utf-8", engine='c')
-    genus_exchange_session_path = os.path.join(ConfigChina.defaultConfigDirectory, "GenusStrategyExchangeSessions.xml")
-    interval = 5
-    exchangeSessionConfig = ExchangeSessionConfig(genus_exchange_session_path, interval)
-    time_frame = exchangeSessionConfig.getSessions("TW", "D").create_time_data_frame()
-    time_frame = time_frame[ConfigChina.GenusHistIntervalStats_header]
-    print time_frame
+    data = data[data[ConfigChina.header_Symbol].isin(["00637L.TW"])]
+    for (time), datasingle in data.groupby(by=[ConfigChina.header_StartTime]):
+        print time
+        pass
+
+    #
+    # genus_exchange_session_path = os.path.join(ConfigChina.defaultConfigDirectory, "GenusStrategyExchangeSessions.xml")
+    # interval = 5
+    # exchangeSessionConfig = ExchangeSessionConfig(genus_exchange_session_path, interval)
+    # time_frame = exchangeSessionConfig.getSessions("TW", "D").create_time_data_frame()
+    # time_frame = time_frame[ConfigChina.GenusHistIntervalStats_header]
+    # print time_frame
 
     pass
 
 
 # testApply()
-# testNoDataDeplay()
+testNoDataDeplay()
 
 
 # checker = DbInstrumentChecker("100", "HK", 20191128, "check_db_instrument.result")
@@ -106,30 +111,3 @@ def testAccuracy():
 # ratio = str(ratio[0: len(ratio) - 3]).strip()
 # ratio=ratio+"%" if not ratio.endswith("%") else ratio
 # print ratio
-
-class Foo(object):
-    def __init__(self, frob, frotz):
-        self.frobnicate = frob
-
-        self.frotz = frotz
-
-        pass
-
-    def init(self, frob, frotz):
-        self.frobnicate = frob
-
-        self.frotz = frotz
-
-
-class Bar(Foo):
-    def init(self, frob, frizzle):
-        super(Bar, self).init(frob, 34)
-
-        self.frazzle = frizzle
-
-
-new = Bar("hello", "world")
-new.init("hello", "world")
-print new.frobnicate
-print new.frazzle
-print new.frotz
