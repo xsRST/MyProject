@@ -18,6 +18,7 @@ public class GenusCTPMarketDataCallback extends GenusCTPCallBack {
         super(manager);
     }
 
+    private Long receiveCount = 0L;
     protected void OnRspUserLogin(GenusCTPRspUserLoginField rspUserLoginField, GenusCTPRspInfoField rspInfoField, int nRequestID, boolean bIsLast) {
         super.OnRspUserLogin(rspUserLoginField, rspInfoField, nRequestID, bIsLast);
         logger.info("登录行情 Api:{}, {} >> {}", rspInfoField.getErrorID() == 0 ? "成功" : "失败", rspInfoField.getErrorID(), rspInfoField.getErrorMsg());
@@ -33,13 +34,17 @@ public class GenusCTPMarketDataCallback extends GenusCTPCallBack {
     }
 
     protected void OnRspSubMarketData(GenusCTPSpecificInstrumentField specificInstrumentField, GenusCTPRspInfoField rspInfoField, int nRequestID, boolean bIsLast) {
-        logger.info("OnRspSubMarketData[{}]:{} >> {}", specificInstrumentField.InstrumentID, rspInfoField.getErrorID(), rspInfoField.getErrorMsg());
-
+        if (nRequestID != 0) {
+            logger.info("订阅失败 [{}]:{} >> {}", specificInstrumentField.InstrumentID, rspInfoField.getErrorID(), rspInfoField.getErrorMsg());
+        }
     }
 
     protected void OnRtnDepthMarketData(GenusCTPDepthMarketDataField depthMarketDataField) {
         logger.debug("OnRtnDepthMarketData");
-
+        if (receiveCount % 100000 == 0) {
+            logger.info(depthMarketDataField.toString());
+        }
+        receiveCount++;
         GenusCTPFileWriter.writeMarketData2File(depthMarketDataField);
     }
 }

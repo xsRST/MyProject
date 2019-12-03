@@ -253,4 +253,54 @@ public class GenusCTPDepthMarketDataField implements Serializable {
     public String getActionDay() {
         return ActionDay;
     }
+
+    @Override
+    public String toString() {
+        return "GenusCTPDepthMarketDataField{" +
+                "TradingDay='" + TradingDay + '\'' +
+                ", InstrumentID='" + InstrumentID + '\'' +
+                ", ExchangeID='" + ExchangeID + '\'' +
+                ", ExchangeInstID='" + ExchangeInstID + '\'' +
+                ", LastPrice=" + LastPrice +
+                ", PreSettlementPrice=" + PreSettlementPrice +
+                ", PreClosePrice=" + PreClosePrice +
+                ", PreOpenInterest=" + PreOpenInterest +
+                ", OpenPrice=" + OpenPrice +
+                ", HighestPrice=" + HighestPrice +
+                ", LowestPrice=" + LowestPrice +
+                ", Volume=" + Volume +
+                ", Turnover=" + Turnover +
+                ", OpenInterest=" + OpenInterest +
+                ", ClosePrice=" + ClosePrice +
+                ", SettlementPrice=" + SettlementPrice +
+                ", UpperLimitPrice=" + UpperLimitPrice +
+                ", LowerLimitPrice=" + LowerLimitPrice +
+                ", PreDelta=" + PreDelta +
+                ", CurrDelta=" + CurrDelta +
+                ", UpdateTime='" + UpdateTime + '\'' +
+                ", UpdateMillisec=" + UpdateMillisec +
+                ", BidPrice1=" + BidPrice1 +
+                ", BidPrice2=" + BidPrice2 +
+                ", BidPrice3=" + BidPrice3 +
+                ", BidPrice4=" + BidPrice4 +
+                ", BidPrice5=" + BidPrice5 +
+                ", BidVolume1=" + BidVolume1 +
+                ", BidVolume2=" + BidVolume2 +
+                ", BidVolume3=" + BidVolume3 +
+                ", BidVolume4=" + BidVolume4 +
+                ", BidVolume5=" + BidVolume5 +
+                ", AskPrice1=" + AskPrice1 +
+                ", AskPrice2=" + AskPrice2 +
+                ", AskPrice3=" + AskPrice3 +
+                ", AskPrice4=" + AskPrice4 +
+                ", AskPrice5=" + AskPrice5 +
+                ", AskVolume1=" + AskVolume1 +
+                ", AskVolume2=" + AskVolume2 +
+                ", AskVolume3=" + AskVolume3 +
+                ", AskVolume4=" + AskVolume4 +
+                ", AskVolume5=" + AskVolume5 +
+                ", AveragePrice=" + AveragePrice +
+                ", ActionDay='" + ActionDay + '\'' +
+                '}';
+    }
 }

@@ -222,7 +222,7 @@ public class GenusCTPFileWriter {
                 marketDataPrintSream.println(header);
             }
             StringBuffer marketDataSb = new StringBuffer();
-            String update = depthMarketDataField.getActionDay() + "." + depthMarketDataField.getUpdateTime() + ":" + StringUtils.rightPad(String.valueOf(depthMarketDataField.getUpdateMillisec()), 3, ",0");
+            String update = depthMarketDataField.getActionDay() + "." + depthMarketDataField.getUpdateTime() + ":" + StringUtils.rightPad(String.valueOf(depthMarketDataField.getUpdateMillisec()), 3, "0");
             marketDataSb.append(update).append("|")
                     .append(depthMarketDataField.getInstrumentID()).append("|").append(depthMarketDataField.getExchangeID()).append("|").append(depthMarketDataField.getExchangeInstID()).append("|")
                     .append(depthMarketDataField.getLastPrice()).append("|").append(depthMarketDataField.getPreSettlementPrice()).append("|")
