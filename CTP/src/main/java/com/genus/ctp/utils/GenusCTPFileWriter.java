@@ -18,7 +18,7 @@ public class GenusCTPFileWriter {
     protected static Logger logger = LogManager.getLogger(GenusCTPFileWriter.class);
     private static PrintStream marketDataPrintSream = null;
     public static boolean writeStaticFileEnd = false;
-
+    public static String ignoreDateStr = "16:00:00:000";
 
     public static void writeTradeData2File(Map<String, GenusCTPInstrumentField> ctpStaticMap, Map<String, GenusCTPDepthMarketDataField> ctpDepthMDMap) {
 
@@ -222,7 +222,14 @@ public class GenusCTPFileWriter {
                 marketDataPrintSream.println(header);
             }
             StringBuffer marketDataSb = new StringBuffer();
-            String update = depthMarketDataField.getActionDay() + "." + depthMarketDataField.getUpdateTime() + ":" + StringUtils.rightPad(String.valueOf(depthMarketDataField.getUpdateMillisec()), 3, "0");
+            String update = TimeUtils.TODAY() + "." + depthMarketDataField.getUpdateTime() + ":" + StringUtils.rightPad(String.valueOf(depthMarketDataField.getUpdateMillisec()), 3, "0");
+
+            //TODO 解析夜盘对应时间戳
+            Date dataTime = TimeUtils.timeFormatMilli.get().parse(depthMarketDataField.getUpdateTime() + ":" + StringUtils.rightPad(String.valueOf(depthMarketDataField.getUpdateMillisec()), 3, "0"));
+            Date ignoreDate = TimeUtils.timeFormatMilli.get().parse(ignoreDateStr);
+            if (dataTime.after(ignoreDate)) {
+                return;
+            }
             marketDataSb.append(update).append("|")
                     .append(depthMarketDataField.getInstrumentID()).append("|").append(depthMarketDataField.getExchangeID()).append("|").append(depthMarketDataField.getExchangeInstID()).append("|")
                     .append(depthMarketDataField.getLastPrice()).append("|").append(depthMarketDataField.getPreSettlementPrice()).append("|")
