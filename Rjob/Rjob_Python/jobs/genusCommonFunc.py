@@ -4,10 +4,10 @@ import threading
 import time
 
 import pandas as pd
+from conf import ConfigChina
+from util.dbutil import getInstrumentList
 
-import ConfigChina
-import logger
-from MySQLDB import getInstrumentList
+from util import logger
 
 
 def parseTimeStr(time_str):
@@ -72,7 +72,7 @@ def retrieveTickDataFromFile(targetDate, defaultTickFileDirectory, tickFileSuffi
     pass
 
 
-def retrieveHistIntervalStatsFromFile(prevBusinessDays, outputDir, region, defaultMaxBDtoUse):
+def retrievePreHistIntervalStatsFromFile(prevBusinessDays, outputDir, region, defaultMaxBDtoUse):
     Raws = []
     RawIntervalStatsSet = pd.DataFrame(columns=ConfigChina.RawIntervalStatsHeader)
     prevBusinessDays = prevBusinessDays["TradeDay"].values.tolist()
@@ -97,7 +97,7 @@ def retrieveHistIntervalStatsFromFile(prevBusinessDays, outputDir, region, defau
     pass
 
 
-def retrieveHistACVolumeFromFile(prevBusinessDays, outputDir, region, defaultMaxBDtoUse):
+def retrievePreHistACVolumeFromFile(prevBusinessDays, outputDir, region, defaultMaxBDtoUse):
     Raws = []
     RawACVolumeRet = pd.DataFrame(columns=ConfigChina.ac_volume_header)
     prevBusinessDays = prevBusinessDays["TradeDay"].values.tolist()
@@ -122,9 +122,9 @@ def retrieveHistACVolumeFromFile(prevBusinessDays, outputDir, region, defaultMax
     pass
 
 
-def retrieveHistInstrumentsFromFile(today, prevBusinessDays, outputDir, userExchnages, useInstrumentTypes, defaultMaxBDtoUse):
+def retrievePreHistInstrumentsFromFile(prevBusinessDays, outputDir, userExchnages, useInstrumentTypes, defaultMaxBDtoUse):
     prevBusinessDays = prevBusinessDays["TradeDay"].values.tolist()
-    businessDays = [today] + prevBusinessDays
+    businessDays = prevBusinessDays
     instrumentDatas = []
     for n in range(int(defaultMaxBDtoUse)):
         day = businessDays[n]

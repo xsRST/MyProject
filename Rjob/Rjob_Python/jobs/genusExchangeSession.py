@@ -5,10 +5,10 @@ import threading
 import xml.dom.minidom
 
 import pandas as pd
+from conf import ConfigChina
+from util.timeUtils import getTimeStamp
 
-import ConfigChina
-import TimeUtils
-from jobs import logger
+from util import logger
 
 Default_str = "Default"
 
@@ -118,66 +118,84 @@ class SessionConfig():
         pass
 
     def getSessions(self):
+
         return self.sessions
         pass
 
     def isCloseAutionTimeSec(self, timeInt):
-        lock = threading.Lock()
-        lock.acquire()
         isPMAution = False
         try:
             if self.sessions.getSessionFromKey("ContTradingPM"):
-                openTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("ContTradingPM").closeTime)
+                openTimeSec = getTimeStamp(self.sessions.getSessionFromKey("ContTradingPM").closeTime)
                 pass
             else:
-                openTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("ContTradingAM").closeTime)
+                openTimeSec = getTimeStamp(self.sessions.getSessionFromKey("ContTradingAM").closeTime)
                 pass
-            closeTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromType("MarketClose").openTime)
+            closeTimeSec = getTimeStamp(self.sessions.getSessionFromType("MarketClose").openTime)
             if timeInt >= openTimeSec and timeInt < closeTimeSec:
                 isPMAution = True
                 pass
         except Exception as e:
             logger.write(e)
-        finally:
-            lock.release()
             pass
         return isPMAution
         pass
 
     def isPMMarketCloseTimeSec(self, timeInt):
-        lock = threading.Lock()
-        lock.acquire()
         isPMCloseTime = False
         try:
-            openTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").openTime)
-            closeTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").closeTime)
+            openTimeSec = getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").openTime)
+            closeTimeSec = getTimeStamp(self.sessions.getSessionFromKey("MarketCloseAfterOpen").closeTime)
             if timeInt >= openTimeSec and timeInt < closeTimeSec:
                 isPMCloseTime = True
                 pass
         except Exception as e:
             logger.write(e)
-        finally:
-            lock.release()
             pass
         return isPMCloseTime
         pass
 
+    def isAutionTimeSecPoint(self, timeInt):
+        isAutionTime = False
+        isCloseAuction = False
+        try:
+            openAuctionSec = closeAuctionSec = 0
+            if self.sessions.getSessionFromType("OpenAuction"):
+                openAuctionSec = getTimeStamp(self.sessions.getSessionFromType("OpenAuction").closeTime)
+                pass
+            if self.sessions.getSessionFromType("CloseAuction"):
+                closeAuctionSec = getTimeStamp(self.sessions.getSessionFromType("CloseAuction").closeTime)
+                pass
+            if openAuctionSec > 0 and openAuctionSec == timeInt:
+                isAutionTime = True
+                isCloseAuction = False
+                pass
+            elif closeAuctionSec > 0 and closeAuctionSec == timeInt:
+                isAutionTime = True
+                isCloseAuction = True
+                pass
+        except Exception as e:
+            logger.write(e)
+            pass
+        return isAutionTime, isCloseAuction
+
+        pass
+
     def getAutionTimeSec(self, timeInt):
-        lock = threading.Lock()
-        lock.acquire()
         autionTimeSec = 0
         isPMAution = False
         try:
-            amCloseTimeInt = TimeUtils.getTimeStamp(self.amCloseTime)
+            amCloseTimeInt = getTimeStamp(self.amCloseTime)
+            if self.sessions.getSessionFromKey("ContTradingAM"):
+                amCloseTimeInt = getTimeStamp(self.sessions.getSessionFromKey("ContTradingAM").closeTime)
+                pass
             if timeInt < amCloseTimeInt:
-                autionTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromType("OpenAuction").closeTime) - 100
+                autionTimeSec = getTimeStamp(self.sessions.getSessionFromType("OpenAuction").openTime)
             else:
-                autionTimeSec = TimeUtils.getTimeStamp(self.sessions.getSessionFromType("CloseAuction").openTime)
+                autionTimeSec = getTimeStamp(self.sessions.getSessionFromType("CloseAuction").openTime)
                 isPMAution = True
         except Exception as e:
             logger.write(e)
-        finally:
-            lock.release()
             pass
         return autionTimeSec, isPMAution
         pass
@@ -202,9 +220,11 @@ class Sessions():
                 sessionType = str(session_elment.getAttribute('sessionType'))
                 session = Session(session_elment)
                 if session:
-                    self.sessions_type[sessionType] = session
-                    self.sessions_key[sessionKey] = session
-
+                    if sessionType in ["OpenAuction", "CloseAuction"] and (session.isTradable != "T" or session.isAuction != "T"):
+                        pass
+                    else:
+                        self.sessions_type[sessionType] = session
+                        self.sessions_key[sessionKey] = session
                     pass
                 pass
             pass
@@ -234,10 +254,11 @@ class Sessions():
         pass
 
     def create_time_data_frame(self):
-        if self.raw_time_data_frame.empty or self.hist_time_data_frame.empty:
-            lock = threading.Lock()
-            lock.acquire()
-            try:
+
+        lock = threading.Lock()
+        lock.acquire()
+        try:
+            if self.raw_time_data_frame.empty or self.hist_time_data_frame.empty:
                 dataList = []
                 histdataList = []
                 for session in self.sessions_key.values():
@@ -259,7 +280,7 @@ class Sessions():
                                 pass
                             pass
                         pass
-                        add_data = pd.DataFrame({ConfigChina.tick_data_header_time: TimeUtils.getTimeStamp(start_time_str),
+                        add_data = pd.DataFrame({ConfigChina.tick_data_header_time: getTimeStamp(start_time_str),
                                                  ConfigChina.header_StartTime: start_time_str,
                                                  ConfigChina.header_EndTime: end_time_str,
                                                  ConfigChina.header_BidSize: 0,
@@ -275,7 +296,7 @@ class Sessions():
                                                  }, index=[0])
                         dataList.append(add_data)
 
-                        add_hist_data = pd.DataFrame({ConfigChina.tick_data_header_time: TimeUtils.getTimeStamp(start_time_str),
+                        add_hist_data = pd.DataFrame({ConfigChina.tick_data_header_time: getTimeStamp(start_time_str),
                                                       ConfigChina.header_StartTime: start_time_str,
                                                       ConfigChina.header_EndTime: end_time_str,
                                                       ConfigChina.header_TradeSize: 0,
@@ -306,17 +327,16 @@ class Sessions():
                 self.hist_time_data_frame = pd.concat(histdataList, ignore_index=True)
                 self.hist_time_data_frame = self.hist_time_data_frame.sort_values(by=ConfigChina.header_StartTime, axis=0, ascending=True)
                 self.hist_time_data_frame.reset_index(drop=True, inplace=True)
-            except Exception as e:
-                logger.write(e)
-                self.raw_time_data_frame = pd.DataFrame()
-                self.hist_time_data_frame = pd.DataFrame()
-            finally:
-                lock.release()
                 pass
             pass
+        except Exception as e:
+            logger.write(e)
+            self.raw_time_data_frame = pd.DataFrame()
+            self.hist_time_data_frame = pd.DataFrame()
+        finally:
+            lock.release()
+            pass
         pass
-
-
 class Session():
 
     def __init__(self, session_element):
@@ -341,3 +361,4 @@ class Session():
         else:
             return "F"
         pass
+

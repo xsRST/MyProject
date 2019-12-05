@@ -5,19 +5,21 @@ from multiprocessing import cpu_count
 
 import pandas as pd
 
+workdir = os.path.dirname(os.path.dirname(__file__))
 # 文件路径;
-defaultConfigDirectory = os.path.join(sys.path[0], "conf")
-defaultDataDirectory = os.path.join(sys.path[0], "output")
-defaultTickFileDirectory = os.path.join(sys.path[0], "../input")
-defaultLogDirectory = os.path.join(sys.path[0], "log")
+defaultConfigDirectory = os.path.join(workdir, "conf")
+defaultDataDirectory = os.path.join(workdir, "output")
+defaultTickFileDirectory = os.path.join(workdir, "../input")
+defaultLogDirectory = os.path.join(workdir, "log")
 
 defaultTickFileDirectory = "D:\\tickdata"
 
 # 最大处理线程数, 默认 cpu核数*5
-maxThreadsTotal = (cpu_count() or 1) * 10
-# tickFileSuffix = ".tick.data.HK"
+maxThreadsTotal = (cpu_count() or 1) * 100
 
-tickFileSuffix = ".tick.data"
+# tickdata文件后缀
+# tickFileSuffix = ".tick.data.HK"
+tickFileSuffix = ".tick.data.TW"
 
 # 股票处理间隔时间
 interval = 5
@@ -31,7 +33,7 @@ InstrumentRepoType = "Repo"
 InstrumentEquityType = "Equity"
 InstrumentBondType = "Bond"
 # 交易所
-Exchange = ['SS','SZ']
+Exchange = ["TW"]
 # Exchange = ['HK']
 # 股票类型
 InstrumentTypeList = [InstrumentEquityType, InstrumentRepoType]

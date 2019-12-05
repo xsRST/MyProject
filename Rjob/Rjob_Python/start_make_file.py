@@ -3,12 +3,12 @@ import optparse
 import os
 import time
 
-import jobs.logger
-from jobs.GenusHistManager import GenusHistManager
+from jobs.genusHistManager import GenusHistManager
+from util import logger
 
 if __name__ == '__main__':
     start_time = time.time()
-    jobs.logger.write("start Time .....  ")
+    logger.write("start Time .....  ")
     p = optparse.OptionParser(description="Check running mode")
     p.add_option("-d", "--date", dest="date", help="find resource files refer to this date,should be like '20160727' ")
 
@@ -19,10 +19,10 @@ if __name__ == '__main__':
         managet = GenusHistManager(date)
         managet.start()
     except Exception as e:
-        jobs.logger.write(e)
+        logger.write(e)
         os._exit(0)
         pass
     end_time = time.time()
-    jobs.logger.write("end  cost  {0:.2f} 秒".format(end_time - start_time))
+    logger.write("end  cost  {0:.2f} 秒".format(end_time - start_time))
     os._exit(0)
     pass
