@@ -1,169 +1,167 @@
 # coding=utf-8
-import Queue
-import os
-import threading
-import time
 
+
+import numpy as np
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
-
-import ConfigChina
-from GenusCalculator import Calculator
-from MySQLDB import getInstrumentList
-from jobs import logger, CommonFunc
+from jobs import ConfigChina, TimeUtils
 
 
-class Handler:
-    def __init__(self, manager):
-        self.rawDataqueue = Queue.Queue()
-        self.manager = manager
-        self.today = self.manager.today
-        self.maxThreadsTotal = self.manager.maxThreadsTotal
-        self.volatilityPeriod = self.manager.volatilityPeriod
-        self.prevBusinessDays, self.nextBusinessDay = CommonFunc.genTodayBusinessDay(self.today, self.manager.configDir, self.manager.region)
+class Handler(object):
+    def __init__(self, static_info, tickdata, SessionConfigs, volatilityPeriod):
+        self.static_info = static_info
+        self.tickdata = tickdata
+        self.symbol = str(self.static_info[ConfigChina.instrument_header_Symbol])
+        self.exchange = str(self.static_info[ConfigChina.instrument_header_Exchange])
+        self.InstrumentType = str(self.static_info[ConfigChina.instrument_header_InstrumentType])
+        self.SessionConfigs = SessionConfigs
+        self.volatilityPeriod = volatilityPeriod
+        ## createTimeIntervalData
+        self.RawIntervalStatsData = self.SessionConfigs.getSessions().get_raw_time_data_frame()
+        self.RawIntervalStatsData[ConfigChina.header_Symbol] = self.symbol
 
-        data_Instrument = getInstrumentList(self.today, self.manager.userExchnages, self.manager.useInstrumentTypes)
-        if data_Instrument.empty:
-            raise Exception("")
-        tickdata = CommonFunc.retrieveTickDataFromFile(self.today, self.manager.defaultTickFileDirectory, self.manager.tickFileSuffix)
-
-        tickdata_symbols = list(set(tickdata[ConfigChina.tick_data_header_symbol].tolist()))
-        instrument_symbols = list(set(data_Instrument[ConfigChina.instrument_header_Symbol].tolist()))
-        process_symbols = list(set(tickdata_symbols).intersection(set(instrument_symbols)))
-        data_Instrument = data_Instrument[data_Instrument[ConfigChina.instrument_header_Symbol].isin(process_symbols)]
-        self.todatyInstrument = data_Instrument
-        if data_Instrument.empty:
-            raise Exception("Can`t Match Instrument From tick Data")
-        instrument_path = ("{0}" + os.path.sep + "{1}{2}.{3}").format(self.manager.outputDir, "GenusInstrument", self.today, "txt")
-        self.todatyInstrument.to_csv(instrument_path, encoding='utf-8', index=False)
-        tickdata = tickdata[tickdata[ConfigChina.tick_data_header_symbol].isin(process_symbols)]
-        self.tick_group = tickdata.groupby(by=[ConfigChina.tick_data_header_symbol])
-        self.exchangeSessionConfig = self.manager.exchangeSessionConfig
-        self.AllHistInstrument = CommonFunc.retrieveHistInstrumentsFromFile(self.today, self.prevBusinessDays, self.manager.outputDir, self.manager.userExchnages,
-                                                                            self.manager.useInstrumentTypes, self.manager.defaultMaxBDtoUse)
         pass
 
-    def start(self):
-        logger.write("start CalcRawData... ")
-        pool = ThreadPoolExecutor(max_workers=self.maxThreadsTotal)
+    def generatorRawData(self):
+        bid_size = ask_size = spreade = trade_size = volume = median_trade_size = OHCLVolatility = CCVolatility = 0
 
-        AllHistRawInterVal = CommonFunc.retrieveHistIntervalStatsFromFile(self.prevBusinessDays, self.manager.outputDir, self.manager.region, self.manager.defaultMaxBDtoUse)
-        AllHistRawACVolume = CommonFunc.retrieveHistACVolumeFromFile(self.prevBusinessDays, self.manager.outputDir, self.manager.region, self.manager.defaultMaxBDtoUse)
+        prevVolatilityPeriodsOHCL = []
+        prevVolatilityPeriodsCC = []
+        next_index = 0
+        while next_index < self.tickdata.shape[0]:
 
-        t = threading.Thread(target=self.startRawDataWriterThread, args=())
-        t.start()
-        index = 0
-        task = []
-        # tickdata 数据,根据数据加到对应时间段上;减少
-        for (symbol), tickdata in self.tick_group:
-            index += 1
-            HistRawInterVals = AllHistRawInterVal[AllHistRawInterVal[ConfigChina.header_Symbol] == symbol]
-            HistRawACVolumes = AllHistRawACVolume[AllHistRawACVolume[ConfigChina.header_Symbol] == symbol]
-            HistInstruments = self.AllHistInstrument[self.AllHistInstrument[ConfigChina.header_Symbol] == symbol]
+            rawTimeSec = self.getcurrencyTimeSec(next_index)
+            next_index += 1
+            if not rawTimeSec:
+                continue
 
-            info = " [ {0} - {1} ] >> {2} ".format(len(self.todatyInstrument), index, symbol)
-            calculator = Calculator(self, tickdata, HistRawInterVals, HistRawACVolumes, HistInstruments, info=info)
-            task.append(pool.submit(calculator.startCalcDataSymbol))
-            pass
-
-        logger.write("End CalcRawData... ")
-        logger.write("start Add RemainData... ")
-        hist_symbols = list(set(self.AllHistInstrument[ConfigChina.instrument_header_Symbol].tolist()))
-        AllHistRawInterVal = AllHistRawInterVal[AllHistRawInterVal[ConfigChina.instrument_header_Symbol].isin(hist_symbols)]
-        AllHistRawACVolume = AllHistRawACVolume[AllHistRawACVolume[ConfigChina.instrument_header_Symbol].isin(hist_symbols)]
-        process_symbols = list(set(self.todatyInstrument[ConfigChina.instrument_header_Symbol].tolist()))
-        remainHistRawInterVals = AllHistRawInterVal[~AllHistRawInterVal[ConfigChina.instrument_header_Symbol].isin(process_symbols)]
-        remainHistRawACVolume = AllHistRawACVolume[~AllHistRawACVolume[ConfigChina.instrument_header_Symbol].isin(process_symbols)]
-
-        remainCount = remainHistRawACVolume.shape[0]
-        index = 0
-        for (symbol), RawACVolumes in remainHistRawACVolume.groupby(by=[ConfigChina.instrument_header_Symbol]):
-            index += 1
-            RawInterVals = remainHistRawInterVals[remainHistRawInterVals[ConfigChina.header_Symbol] == symbol]
-            HistInstruments = self.AllHistInstrument[self.AllHistInstrument[ConfigChina.header_Symbol] == symbol]
-            info = " [ {0} - {1} ] >> Remain {2} ".format(remainCount, index, symbol)
-            calculator = Calculator(self, static_info=HistInstruments, info=info)
-            task.append(pool.submit(calculator.generatorHistDataSymbol, RawInterVals, RawACVolumes))
-            pass
-        logger.write("start CalcHistData... ")
-        HistIntervalStatsDatas = []
-        HistInstrumentProfiles = []
-        for future in task:
-            histData = future.result()
-            HistIntervalStatsDataInst = histData[0]
-            HistInstrumentProfileInst = histData[1]
-            HistIntervalStatsDatas.append(HistIntervalStatsDataInst)
-            HistInstrumentProfiles.append(HistInstrumentProfileInst)
-            pass
-        logger.write("End CalcHistData... ")
-        if len(HistIntervalStatsDatas) > 0 and len(HistInstrumentProfiles) > 0:
-            self.processHistData(HistIntervalStatsDatas, HistInstrumentProfiles)
-            pass
-        logger.write("Wait Queue To End...")
-        self.rawDataqueue.join()
-        pass
-
-    def startRawDataWriterThread(self):
-
-        filenameStats = os.path.join(self.manager.outputDir, "{0}-{1}{2}".format(self.manager.region, "RawIntervalStats", self.today))
-        filenameACVolume = os.path.join(self.manager.outputDir, "{0}-{1}{2}".format(self.manager.region, "RawACVolume", self.today))
-        if os.path.isfile(filenameStats):
-            os.remove(filenameStats)
-            pass
-        if os.path.isfile(filenameACVolume):
-            os.remove(filenameACVolume)
-            pass
-        while True:
-            rawData = self.rawDataqueue.get()
-            self.rawDataqueue.task_done()
-            RawIntervalStats = rawData[0]
-            RawAcvolume = rawData[1]
-            CommonFunc.writeDataToFileAppend(filenameStats, RawIntervalStats)
-            CommonFunc.writeDataToFileAppend(filenameACVolume, RawAcvolume)
-            pass
-        pass
-
-    def processHistData(self, HistIntervalStatsDatas, HistInstrumentProfiles):
-        logger.write("Generating Hist File file")
-        start_time = time.time()
-        HistIntervalStatsData = pd.DataFrame(columns=ConfigChina.GenusHistIntervalStats_header)
-        HistInstrumentProfile = pd.DataFrame(columns=ConfigChina.GenusInstrumentProfile_header)
-
-        if len(HistIntervalStatsDatas) > 0 and len(HistInstrumentProfiles) > 0:
-            HistIntervalStatsData = pd.concat(HistIntervalStatsDatas, ignore_index=True)
-            HistInstrumentProfile = pd.concat(HistInstrumentProfiles, ignore_index=True)
-            HistIntervalStatsData = HistIntervalStatsData.drop_duplicates(ConfigChina.symbol_start_end_header)
-            HistIntervalStatsData = HistIntervalStatsData.sort_values(by=ConfigChina.symbol_start_end_header, axis=0, ascending=True)
-            HistIntervalStatsData.reset_index(drop=True, inplace=True)
-            HistInstrumentProfile = HistInstrumentProfile.drop_duplicates(ConfigChina.header_Symbol)
-            HistInstrumentProfile = HistInstrumentProfile.sort_values(by=ConfigChina.header_Symbol, axis=0, ascending=True)
-            HistInstrumentProfile.reset_index(drop=True, inplace=True)
-        else:
-            logger.write("Not Find Hist Data")
-
-        IntervalStatsFileName = os.path.join(self.manager.outputDir, "{0}{1}{2}".format("GenusHistIntervalStats", self.nextBusinessDay, ".csv"))
-        InstrumentProfileFileName = os.path.join(self.manager.outputDir, "{0}{1}{2}".format("GenusInstrumentProfile", self.nextBusinessDay, ".csv"))
-        HistIntervalStatsData.to_csv(IntervalStatsFileName, encoding="utf-8", index=False, header=False)
-        HistInstrumentProfile.to_csv(InstrumentProfileFileName, encoding="utf-8", index=False, header=False)
-        logger.write(" Writer To File : {0}".format(IntervalStatsFileName))
-        logger.write("Writer To File : {0}".format(InstrumentProfileFileName))
-
-        if self.manager.discriminateExchange:
-            for exchange in ConfigChina.Exchange:
-                IntervalStatsFileName = os.path.join(self.manager.outputDir, "{0}{1}_{2}{3}".format("GenusHistIntervalStats", self.nextBusinessDay, exchange, ".csv"))
-                InstrumentProfileFileName = os.path.join(self.manager.outputDir, "{0}{1}_{2}{3}".format("GenusInstrumentProfile", self.nextBusinessDay, exchange, ".csv"))
-
-                instrumentUniverseExchange = self.AllHistInstrument[self.AllHistInstrument[ConfigChina.instrument_header_Exchange] == exchange]
-                symbols = list(set(instrumentUniverseExchange[ConfigChina.header_Symbol].tolist()))
-                HistIntervalStatsDataExchange = HistIntervalStatsData[HistIntervalStatsData[ConfigChina.header_Symbol].isin(symbols)]
-                HistInstrumentProfileExchange = HistInstrumentProfile[HistInstrumentProfile[ConfigChina.header_Symbol].isin(symbols)]
-                HistIntervalStatsDataExchange.to_csv(IntervalStatsFileName, encoding="utf-8", index=False, header=False)
-                HistInstrumentProfileExchange.to_csv(InstrumentProfileFileName, encoding="utf-8", index=False, header=False)
-                logger.write(" Writer To File : {0}".format(IntervalStatsFileName))
-                logger.write("Writer To File : {0}".format(InstrumentProfileFileName))
+            tickDataInstrumentInterval, row, intervalIndex = self.getTickDatasFromInterval(rawTimeSec)
+            if tickDataInstrumentInterval.empty:
+                continue
                 pass
-            pass
-        end_time = time.time()
-        logger.write("generateEvoSchedClassificationsFile Done finish cost  {0:.2f} 秒 ".format(end_time - start_time))
+            next_index = max(tickDataInstrumentInterval.index.tolist()) + 1
 
+            isTradable = row[ConfigChina.header_isTradable]
+            isAuction = row[ConfigChina.header_isAuction]
+
+            if isTradable == "T":
+                tickDataInstrumentInterval.reset_index(drop=True, inplace=True)
+                bid_size = (tickDataInstrumentInterval[ConfigChina.tick_data_header_bidsize].mean())
+                ask_size = (tickDataInstrumentInterval[ConfigChina.tick_data_header_asksize].mean())
+                spreade = (tickDataInstrumentInterval[ConfigChina.header_SpreadSize].mean())
+                trade_size = (tickDataInstrumentInterval[ConfigChina.tick_data_header_trdvol].mean())
+                volume = tickDataInstrumentInterval[ConfigChina.tick_data_header_trdvol].sum()
+                median_trade_size = tickDataInstrumentInterval[ConfigChina.tick_data_header_trdvol].median()
+                Open = tickDataInstrumentInterval.ix[0][ConfigChina.tick_data_header_trdprice]
+                Close = tickDataInstrumentInterval.ix[len(tickDataInstrumentInterval) - 1][ConfigChina.tick_data_header_trdprice]
+
+                High = tickDataInstrumentInterval[ConfigChina.tick_data_header_trdprice].max()
+                Low = tickDataInstrumentInterval[ConfigChina.tick_data_header_trdprice].min()
+
+                prevVolatilityPeriodsCC = prevVolatilityPeriodsCC + [np.log(Close / Open)]
+                num1 = np.power(np.log(High / Low), 2)
+                num2 = np.power(np.log(Close / Open), 2)
+                num3 = np.log(4) - 1
+                prevVolatilityPeriodsOHCL = prevVolatilityPeriodsOHCL + [((0.5 * num1) - num3 * num2)]
+                if (len(prevVolatilityPeriodsOHCL) > self.volatilityPeriod):
+                    prevVolatilityPeriodsOHCL = prevVolatilityPeriodsOHCL[1: len(prevVolatilityPeriodsOHCL) - 1]
+                    prevVolatilityPeriodsCC = prevVolatilityPeriodsCC[1: len(prevVolatilityPeriodsCC) - 1]
+                avg = np.mean(prevVolatilityPeriodsOHCL)
+                if avg and (avg > 0):
+                    OHCLVolatility = 100 * np.sqrt(avg)
+                if len(prevVolatilityPeriodsCC) > 2:
+                    CCVolatility = 100 * np.std(prevVolatilityPeriodsCC)
+
+            else:
+                prevVolatilityPeriodsOHCL = []
+                prevVolatilityPeriodsCC = []
+                pass
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_BidSize] = bid_size
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_AskSize] = ask_size
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_SpreadSize] = spreade
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_TradeSize] = trade_size
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_Volume] = volume
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_Volatility] = OHCLVolatility
+            self.RawIntervalStatsData.loc[intervalIndex, ConfigChina.header_CCVolatility] = CCVolatility
+            bid_size = ask_size = spreade = trade_size = volume = median_trade_size = OHCLVolatility = CCVolatility = 0
+            pass
+        ac_volume = self.tickdata.iloc[len(self.tickdata) - 1][ConfigChina.tick_data_header_acvol]
+        RawACVolume = pd.DataFrame({ConfigChina.header_Symbol: [self.symbol], ConfigChina.header_ADV: ac_volume}, columns=ConfigChina.ac_volume_header)
+        instrumentDailyVolume = np.sum(self.RawIntervalStatsData[ConfigChina.header_Volume].tolist())
+        if instrumentDailyVolume and instrumentDailyVolume > 0:
+            self.RawIntervalStatsData[ConfigChina.header_VolumePercent] = self.RawIntervalStatsData.Volume / instrumentDailyVolume
+            pass
+        self.RawIntervalStatsData = self.RawIntervalStatsData[ConfigChina.RawIntervalStatsHeader]
+        self.RawIntervalStatsData = self.RawIntervalStatsData.sort_values(by=[ConfigChina.header_Symbol, ConfigChina.header_StartTime], axis=0, ascending=True)
+        self.RawIntervalStatsData.reset_index(drop=True, inplace=True)
+        RawACVolume = RawACVolume.drop_duplicates(ConfigChina.header_Symbol)
+        RawACVolume.reset_index(drop=True, inplace=True)
+        return self.RawIntervalStatsData, RawACVolume
         pass
+
+    pass
+
+    def getcurrencyTimeSec(self, next_index):
+        rawData = self.tickdata.iloc[next_index]
+        rawTimeSec = rawData[ConfigChina.tick_data_header_time]
+        return rawTimeSec
+        pass
+
+    def getTickDatasFromInterval(self, rawTimeSec):
+        row = self.RawIntervalStatsData[self.RawIntervalStatsData[ConfigChina.tick_data_header_time] <= rawTimeSec]
+        index = max(row.index.tolist())
+        row = row.iloc[index]
+        start_time_str = row[ConfigChina.header_StartTime]
+        end_time_str = row[ConfigChina.header_EndTime]
+
+        start_time_int = TimeUtils.getTimeStamp(start_time_str)
+        end_time_int = TimeUtils.getTimeStamp(end_time_str)
+        tickDataInstrumentInterval = self.tickdata[(self.tickdata[ConfigChina.tick_data_header_time] >= int(start_time_int)) & (self.tickdata[ConfigChina.tick_data_header_time] < int(end_time_int))]
+
+        return tickDataInstrumentInterval, row, index
+        pass
+
+    pass
+
+
+class HandlerTW(Handler):
+    def getcurrencyTimeSec(self, next_index):
+        rawData = self.tickdata.iloc[next_index]
+        timeSec = rawData[ConfigChina.tick_data_header_time]
+        trdvol = rawData[ConfigChina.tick_data_header_trdvol]
+        acvol = rawData[ConfigChina.tick_data_header_acvol]
+        if trdvol == acvol:
+            if next_index == 0:
+                rawTimeSec, isPMAution = self.SessionConfigs.getAutionTimeSec(0)
+                pass
+            else:
+                rawTimeSec = None
+                pass
+            self.tickdata.loc[next_index, ConfigChina.tick_data_header_time] = rawTimeSec
+            pass
+
+        else:
+            rawTimeSec = super(HandlerTW, self).getcurrencyTimeSec(next_index)
+
+        if rawTimeSec and self.SessionConfigs.isPMMarketCloseTimeSec(rawTimeSec):
+            rawTimeSec, isPMAution = self.SessionConfigs.getAutionTimeSec(rawTimeSec)
+            self.tickdata.loc[next_index, ConfigChina.tick_data_header_time] = rawTimeSec
+            pass
+        return rawTimeSec
+        pass
+
+    def getTickDatasFromInterval(self, rawTimeSec):
+
+        row = self.RawIntervalStatsData[self.RawIntervalStatsData[ConfigChina.tick_data_header_time] <= rawTimeSec]
+        index = max(row.index.tolist())
+        row = row.iloc[index]
+        isAuction = row[ConfigChina.header_isAuction]
+        if (isAuction == "T" and self.SessionConfigs.isCloseAutionTimeSec(rawTimeSec)):
+            tickDataInstrumentInterval = self.tickdata.tail(1)
+            pass
+        else:
+            return super(HandlerTW, self).getTickDatasFromInterval(rawTimeSec)
+            pass
+        return tickDataInstrumentInterval, row, index
+        pass
+
+    pass

@@ -17,7 +17,7 @@ defaultTickFileDirectory = "D:\\tickdata"
 maxThreadsTotal = (cpu_count() or 1) * 10
 # tickFileSuffix = ".tick.data.HK"
 
-tickFileSuffix = ".tick.data.TW"
+tickFileSuffix = ".tick.data"
 
 # 股票处理间隔时间
 interval = 5
@@ -31,7 +31,7 @@ InstrumentRepoType = "Repo"
 InstrumentEquityType = "Equity"
 InstrumentBondType = "Bond"
 # 交易所
-Exchange = ['TW']
+Exchange = ['SS','SZ']
 # Exchange = ['HK']
 # 股票类型
 InstrumentTypeList = [InstrumentEquityType, InstrumentRepoType]
