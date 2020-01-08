@@ -5,9 +5,8 @@ import time
 
 import pandas as pd
 from conf import ConfigChina
-from util.dbutil import getInstrumentList
-
 from util import logger
+from util.dbutil import getInstrumentList
 
 
 def parseTimeStr(time_str):
@@ -16,10 +15,6 @@ def parseTimeStr(time_str):
         time_int = int(time_str[0:2]) * 3600 + int(time_str[3:5]) * 60 + +int(time_str[6:7])
     return time_int
     pass
-
-
-# ============================= init func =================================
-
 
 # ============================ init func detail implement ================
 def genTodayBusinessDay(today, configDir, region):
@@ -31,7 +26,7 @@ def genTodayBusinessDay(today, configDir, region):
     if businessDays_list[businessDays_list["TradeDay"] == int(today)].empty:
         logger.write("TargetDate {} is NOT a business day! Please Check".format(today))
         os._exit(0)
-
+        pass
     nextBusinessDay = businessDays_list[businessDays_list["TradeDay"] > int(today)].min()
     nextBusinessDay = nextBusinessDay["TradeDay"]
     prev_business_days = businessDays_list[businessDays_list["TradeDay"] < int(today)]
@@ -39,7 +34,6 @@ def genTodayBusinessDay(today, configDir, region):
     logger.write("getTodayBusinessDay  Done")
     return prev_business_days, nextBusinessDay
     pass
-
 
 
 # =========================== Loading data from file =========================
@@ -56,11 +50,11 @@ def retrieveTickDataFromFile(targetDate, defaultTickFileDirectory, tickFileSuffi
             tickdata = pd.read_csv(tickfile, sep=",", encoding="utf-8", engine='c')
         else:
             tickdata = pd.read_csv(tickfile, sep=",", encoding="utf-8", engine='c', header=None, names=ConfigChina.tick_data_header)
-
+            pass
         tickdata = tickdata.dropna()
         tickdata = tickdata.fillna(0)
         tickdata = tickdata[(tickdata[ConfigChina.tick_data_header_asksize] > 0) & (tickdata[ConfigChina.tick_data_header_trdvol] > 0)]
-        tickdata[ConfigChina.header_SpreadSize] = 2000 * ((tickdata[ConfigChina.tick_data_header_askprice] - tickdata[ConfigChina.tick_data_header_bidprice]) / (
+        tickdata[ConfigChina.header_SpreadSize] = 20000 * ((tickdata[ConfigChina.tick_data_header_askprice] - tickdata[ConfigChina.tick_data_header_bidprice]) / (
                 tickdata[ConfigChina.tick_data_header_askprice] + tickdata[ConfigChina.tick_data_header_bidprice]))
 
         read_csv_endTime = time.time()
@@ -122,11 +116,9 @@ def retrievePreHistACVolumeFromFile(prevBusinessDays, outputDir, region, default
     pass
 
 
-def retrievePreHistInstrumentsFromFile(prevBusinessDays, outputDir, userExchnages, useInstrumentTypes, defaultMaxBDtoUse):
-    prevBusinessDays = prevBusinessDays["TradeDay"].values.tolist()
-    businessDays = prevBusinessDays
+def retrievePreHistInstrumentsFromFile(businessDays, outputDir, userExchnages, useInstrumentTypes, defaultMaxBDtoUse):
     instrumentDatas = []
-    for n in range(int(defaultMaxBDtoUse)):
+    for n in range(min(len(businessDays), int(defaultMaxBDtoUse))):
         day = businessDays[n]
         hist_instrument_path = ("{0}" + os.path.sep + "{1}{2}.{3}").format(outputDir, "GenusInstrument", day, "txt")
         data = pd.DataFrame()

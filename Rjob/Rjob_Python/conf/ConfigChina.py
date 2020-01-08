@@ -3,8 +3,6 @@ import os
 import sys
 from multiprocessing import cpu_count
 
-import pandas as pd
-
 workdir = os.path.dirname(os.path.dirname(__file__))
 # 文件路径;
 defaultConfigDirectory = os.path.join(workdir, "conf")
@@ -12,19 +10,27 @@ defaultDataDirectory = os.path.join(workdir, "output")
 defaultTickFileDirectory = os.path.join(workdir, "../input")
 defaultLogDirectory = os.path.join(workdir, "log")
 
+MDLevel = os.getenv("MDLevel") if os.getenv("MDLevel") else "L1"
+print("MDLevel={} ".format(MDLevel))
+if (MDLevel.strip() == "L2"):
+    defaultTickFileDirectory = os.path.join(sys.path[0], "input" + os.path.sep + "tickdata_L2")
+    pass
+
 defaultTickFileDirectory = "D:\\tickdata"
 
 # 最大处理线程数, 默认 cpu核数*5
 maxThreadsTotal = (cpu_count() or 1) * 100
+maxThreadsTotal = 1
 
-# tickdata文件后缀
-# tickFileSuffix = ".tick.data.HK"
-tickFileSuffix = ".tick.data.TW"
+tickFileSuffix = ".tick.data"
 
 # 股票处理间隔时间
 interval = 5
 # 历史数据天数
-defaultMaxBDtoUse = 24
+defaultMaxBDtoUse = 2
+
+# 集合竞价交易量计算分位数设置
+defaultQuantileValue = 80
 
 # 是否按交易所生成文件
 discriminateExchange = False
@@ -33,17 +39,14 @@ InstrumentRepoType = "Repo"
 InstrumentEquityType = "Equity"
 InstrumentBondType = "Bond"
 # 交易所
-Exchange = ["TW"]
+Exchange = ["SS"]
 # Exchange = ['HK']
+# Exchange = ['TW']
 # 股票类型
 InstrumentTypeList = [InstrumentEquityType, InstrumentRepoType]
 print(InstrumentTypeList)
 
-MDLevel = os.getenv("MDLevel") if os.getenv("MDLevel") else "L1"
-if (MDLevel.strip() == "L2"):
-    defaultTickFileDirectory = os.path.join(sys.path[0], "input" + os.path.sep + "tickdata_L2")
 
-print("MDLevel={} ".format(MDLevel))
 
 if not os.path.exists(defaultConfigDirectory):
     print("Conf File Path is not Exist:{0}".format(defaultConfigDirectory))
@@ -84,7 +87,6 @@ tick_data_header = [tick_data_header_time, tick_data_header_symbol, tick_data_he
                     tick_data_header_bidsize, tick_data_header_asksize, tick_data_header_bidprice,
                     tick_data_header_askprice]
 
-tickdata = pd.DataFrame(columns=tick_data_header)
 # -------header config ----------
 
 # ---------Indicator and IntervalStats header -----------------
@@ -106,6 +108,7 @@ header_TradeSize = "TradeSize"
 header_TradeSizeSD = "TradeSizeSD"
 header_Volume = "Volume"
 header_VolumeSD = "VolumeSD"
+header_VolumeQuant = "VolumeQuantile"
 header_VolumePercent = "VolumePercent"
 header_VolumePercentSD = "VolumePercentSD"
 header_FirstPrintTime = "FirstPrintTime"
@@ -143,8 +146,3 @@ GenusHistIntervalStats_header = symbol_start_end_header + [header_TradeSize, hea
 GenusInstrumentProfile_header = [header_Symbol, header_AvgSpread, header_AvgVolatility, header_ADV, header_BTR,
                                  header_HasValidCurve]
 
-format_4 = lambda x: "%.4f" % x
-format_2 = lambda x: "%.2f" % x
-format = lambda x: "%d" % x
-
-defaultformat = format_4

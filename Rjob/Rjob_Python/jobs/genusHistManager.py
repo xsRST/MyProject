@@ -2,7 +2,6 @@
 
 
 from jobs.genusHandler import GenusHistHandler
-
 from util import logger
 
 
@@ -16,9 +15,9 @@ class GenusHistManager:
         pass
 
     def start(self):
-
         logger.write("startCalcData... ")
         self.hander = GenusHistHandler(self)
         self.hander.start()
         pass
+
     pass

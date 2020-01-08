@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf-8
 import Queue
 import os
@@ -9,13 +10,11 @@ import numpy as np
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from conf import ConfigChina
-from jobs.genusCalculator import generatorRawData
-from jobs.genusCommonFunc import retrievePreHistInstrumentsFromFile, genTodayBusinessDay, retrieveTickDataFromFile, retrievePreHistIntervalStatsFromFile, retrievePreHistACVolumeFromFile
+from jobs.genusCalculator import GenusHistCalclator
+from jobs.genusCommonFunc import retrievePreHistInstrumentsFromFile, retrieveTickDataFromFile, retrievePreHistIntervalStatsFromFile, retrievePreHistACVolumeFromFile
 from jobs.genusExchangeSession import ExchangeSessionConfig
-from util.dbutil import getInstrumentList
-from util.timeUtils import getTimeStamp
-
 from util import logger
+from util.dbutil import genTodayBusinessDay
 
 
 class GenusHistHandler:
@@ -53,12 +52,13 @@ class GenusHistHandler:
         pass
 
     def initBusiness(self):
-        self.prevBusinessDays, self.nextBusinessDay = genTodayBusinessDay(self.today, self.configDir, self.region)
+        self.prevBusinessDays, self.nextBusinessDay = genTodayBusinessDay(self.today)
         pass
 
     def getTickDataGroup(self):
         logger.write("retrieve Tick Data Group... ")
-        data_Instrument = getInstrumentList(self.today, self.userExchnages, self.useInstrumentTypes)
+        data_Instrument = retrievePreHistInstrumentsFromFile([int(self.today)], self.outputDir, self.userExchnages,
+                                                             self.useInstrumentTypes, self.defaultMaxBDtoUse)
         if data_Instrument.empty:
             raise Exception("")
         tickdata = retrieveTickDataFromFile(self.today, self.defaultTickFileDirectory, self.tickFileSuffix)
@@ -85,7 +85,7 @@ class GenusHistHandler:
 
     def getPreHistDataFromMaxDB(self):
         logger.write("getPreHistDataFromMaxDB... ")
-        self.PreAllHistInstrument = retrievePreHistInstrumentsFromFile(self.prevBusinessDays, self.outputDir, self.userExchnages,
+        self.PreAllHistInstrument = retrievePreHistInstrumentsFromFile(self.prevBusinessDays["TradeDay"].values.tolist(), self.outputDir, self.userExchnages,
                                                                        self.useInstrumentTypes, self.defaultMaxBDtoUse)
         self.preHistRawInterVals = retrievePreHistIntervalStatsFromFile(self.prevBusinessDays, self.outputDir, self.region, self.defaultMaxBDtoUse)
         self.preHistRawACVolumes = retrievePreHistACVolumeFromFile(self.prevBusinessDays, self.outputDir, self.region, self.defaultMaxBDtoUse)
@@ -103,17 +103,17 @@ class GenusHistHandler:
         t.start()
         t = Thread(target=self.startReceiveHistDtaThread, args=())
         t.start()
-        self.startAddRemainData()
+        t = Thread(target=self.startAddRemainData, args=())
+        t.start()
+        # self.startAddRemainData()
         self.startCalcData()
-
-        while not (self.histDataQueue.empty() or self.rawDataQueue.empty()):
+        while not (self.histDataQueue.empty() and self.rawDataQueue.empty()):
             logger.write("waiting histDataQueue and rawDataQueue ... ")
-            time.sleep(1000)
+            time.sleep(1)
             pass
         if len(self.HistIntervalStatsDatas) > 0 and len(self.HistInstrumentProfiles) > 0:
             self.processHistData(self.HistIntervalStatsDatas, self.HistInstrumentProfiles)
             pass
-
         pass
 
     def startWriteRawDtaThread(self):
@@ -161,6 +161,7 @@ class GenusHistHandler:
 
     def startAddRemainData(self):
         logger.write("start Add RemainData... ")
+        remainCount =0
         start_time = time.time()
         preHistSymbols = list(set(self.PreAllHistInstrument[ConfigChina.instrument_header_Symbol].tolist()))
         today_symbols = list(set(self.todatyInstrument[ConfigChina.instrument_header_Symbol].tolist()))
@@ -168,30 +169,21 @@ class GenusHistHandler:
         preHistRawInterVal = self.preHistRawInterVals[self.preHistRawInterVals[ConfigChina.instrument_header_Symbol].isin(preHistSymbols)]
         preHistRawACVolume = self.preHistRawACVolumes[self.preHistRawACVolumes[ConfigChina.instrument_header_Symbol].isin(preHistSymbols)]
         if not preHistRawInterVal.empty:
-            preHistRawACVolumeGroup = preHistRawACVolume.groupby(by=[ConfigChina.instrument_header_Symbol])
-            remainCount = len(preHistRawACVolumeGroup.count())
-            index = 0
-            addRemainPool = ThreadPoolExecutor(max_workers=remainCount)
-            for (symbol), RawACVolumes in preHistRawACVolumeGroup:
-                index += 1
-                RawInterVals = preHistRawInterVal[preHistRawInterVal[ConfigChina.header_Symbol] == symbol]
-                static_info = self.PreAllHistInstrument[self.PreAllHistInstrument[ConfigChina.header_Symbol] == symbol]
-                info = " [ {0} - {1} ] >> Remain {2} ".format(remainCount, index, symbol)
-                addRemainPool.submit(self.mergeRawDatas, static_info=static_info, RawInterVals=RawInterVals, RawACVolumes=RawACVolumes, info=info)
-                pass
-            addRemainPool.shutdown(wait=True)
-
+            remainCount = preHistRawACVolume.shape[0]
+            info = "No. of  Remain [{0}] ".format(remainCount)
+            self.mergeRawDatas(RawInterVals=preHistRawInterVal, RawACVolumes=preHistRawACVolume, info=info)
             pass
         end_time = time.time()
-        logger.write("Add RemainData  done >> cost time: {0:.2f}秒".format(end_time - start_time))
+        logger.write("Add RemainData [{0}]  done >> cost time: {1:.2f}秒".format(remainCount, end_time - start_time))
         pass
 
     def startCalcData(self):
         logger.write("start CalcRawData ... ")
         start_time = time.time()
         index = 0
-        rawPool = ThreadPoolExecutor(max_workers=self.maxThreadsTotal)
         # tickdata 数据,根据数据加到对应时间段上;减少
+        tick_count = self.todatyInstrument.shape[0] + 2
+        rawPool = ThreadPoolExecutor(max_workers=min(self.maxThreadsTotal, tick_count))
         for (symbol), tickdata in self.tick_group:
             index += 1
             static_info = self.todatyInstrument[self.todatyInstrument[ConfigChina.instrument_header_Symbol] == symbol]
@@ -213,9 +205,15 @@ class GenusHistHandler:
             exchange = str(static_info[ConfigChina.instrument_header_Exchange])
             InstrumentType = str(static_info[ConfigChina.instrument_header_InstrumentType])
             SessionConfigs = self.exchangeSessionConfig.getSessionConfigs(exchange, InstrumentType)
+            if not SessionConfigs:
+                msg = "SessionConfigs is Null >> {0},{1}".format(exchange, InstrumentType)
+                logger.write(msg)
+                raise RuntimeError(msg)
+                pass
             tickdata = tickdata.sort_values(by=[ConfigChina.tick_data_header_time], axis=0, ascending=True)
             tickdata.reset_index(drop=True, inplace=True)
-            RawIntervalStats, RawACVolume = generatorRawData(static_info=static_info, tickdata=tickdata, SessionConfigs=SessionConfigs, volatilityPeriod=volatilityPeriod)
+            calclator = GenusHistCalclator(static_info=static_info, tickdata=tickdata, SessionConfigs=SessionConfigs, volatilityPeriod=volatilityPeriod)
+            RawIntervalStats, RawACVolume = calclator.generatorRawData()
             self.rawDataQueue.put([RawIntervalStats, RawACVolume])
         except:
             logger.write("Failed calcRawData {0}:\n{1}".format(info, traceback.format_exc()))
@@ -223,7 +221,6 @@ class GenusHistHandler:
         end_time = time.time()
         logger.write("CalcRawData  done {0}>> cost time: {1:.2f}秒".format(info, end_time - start_time))
         return RawIntervalStats, RawACVolume, static_info, info
-
         pass
 
     def calcHistData(self, future):
@@ -238,8 +235,6 @@ class GenusHistHandler:
                 logger.write("Data is Empty Skipping {0} ".format(info))
                 return
             symbol = str(static_info[ConfigChina.instrument_header_Symbol])
-            exchange = str(static_info[ConfigChina.instrument_header_Exchange])
-            InstrumentType = str(static_info[ConfigChina.instrument_header_InstrumentType])
 
             RawInterVals = self.preHistRawInterVals[self.preHistRawInterVals[ConfigChina.header_Symbol] == symbol]
             RawACVolumes = self.preHistRawACVolumes[self.preHistRawACVolumes[ConfigChina.header_Symbol] == symbol]
@@ -250,104 +245,111 @@ class GenusHistHandler:
 
             RawACVolumes = pd.concat([RawACVolumes, RawACVolume], ignore_index=True, sort=False)
             RawACVolumes = RawACVolumes.sort_values(by=[ConfigChina.header_Symbol], axis=0, ascending=True)
-
-            self.mergeRawDatas(static_info=static_info, RawInterVals=RawInterVals, RawACVolumes=RawACVolumes, info=info)
+            self.mergeRawDatas(RawInterVals=RawInterVals, RawACVolumes=RawACVolumes, info=info)
         except:
             logger.write(" Failed CalcHistData {0} :\n{1}".format(info, traceback.format_exc()))
             pass
         pass
 
-    def handleHistInterval(self, symbol, startTime, endTime, intervalStat):
-
-        isAuction = intervalStat[ConfigChina.header_isAuction].values.tolist()[0]
-        isTradable = intervalStat[ConfigChina.header_isTradable].values.tolist()[0]
-        add_data = {
-            ConfigChina.header_Symbol: symbol,
-            ConfigChina.header_StartTime: startTime,
-            ConfigChina.header_EndTime: endTime,
-            ConfigChina.header_TradeSize: intervalStat[ConfigChina.header_TradeSize].mean(),
-            ConfigChina.header_TradeSizeSD: intervalStat[ConfigChina.header_TradeSize].std(),
-            ConfigChina.header_BidSize: intervalStat[ConfigChina.header_BidSize].mean(),
-            ConfigChina.header_BidSizeSD: intervalStat[ConfigChina.header_BidSize].std(),
-            ConfigChina.header_AskSize: intervalStat[ConfigChina.header_AskSize].mean(),
-            ConfigChina.header_AskSizeSD: intervalStat[ConfigChina.header_AskSize].std(),
-            ConfigChina.header_SpreadSize: intervalStat[ConfigChina.header_SpreadSize].mean(),
-            ConfigChina.header_SpreadSizeSD: intervalStat[ConfigChina.header_SpreadSize].std(),
-            ConfigChina.header_Volume: intervalStat[ConfigChina.header_Volume].mean(),
-            ConfigChina.header_VolumeSD: intervalStat[ConfigChina.header_Volume].std(),
-            ConfigChina.header_VolumePercent: intervalStat[ConfigChina.header_VolumePercent].mean(),
-            ConfigChina.header_VolumePercentSD: intervalStat[ConfigChina.header_VolumePercent].std(),
-            ConfigChina.header_Volatility: intervalStat[ConfigChina.header_Volatility].mean(),
-            ConfigChina.header_VolatilitySD: intervalStat[ConfigChina.header_Volatility].std(),
-            ConfigChina.header_CCVolatility: intervalStat[ConfigChina.header_CCVolatility].mean(),
-            ConfigChina.header_CCVolatilitySD: intervalStat[ConfigChina.header_CCVolatility].std(),
-            ConfigChina.tick_data_header_time: getTimeStamp(startTime),
-            ConfigChina.header_isAuction: isAuction,
-            ConfigChina.header_isTradable: isTradable
-        }
-        return add_data
-
+    def handler_percentile(self, df):
+        return np.percentile(df.values, ConfigChina.defaultQuantileValue)
         pass
 
-    def mergeRawDatas(self, static_info, RawInterVals, RawACVolumes, info=""):
+    def handler_agg(self, data, func, clolume_name):
+
+        data_frame = data.agg(func)
+        data_frame = data_frame.to_frame()
+        data_frame.columns = [clolume_name]
+
+        return data_frame
+        pass
+
+    def handler_InterVal_Apply(self, StatsData, HistIntervalStatsData, HistInstrumentProfile):
+        symbol = StatsData[ConfigChina.header_Symbol]
+        HistIntervalStatsData = HistIntervalStatsData[HistIntervalStatsData[ConfigChina.header_Symbol] == symbol]
+        ac_volume = HistIntervalStatsData[ConfigChina.header_Volume].sum()
+        volume = StatsData[ConfigChina.header_Volume]
+        volumePercent = volume / ac_volume
+        HistInstrumentProfile = HistInstrumentProfile[HistInstrumentProfile[ConfigChina.header_Symbol] == symbol]
+        if not HistInstrumentProfile.empty:
+            acVol = HistInstrumentProfile[ConfigChina.header_ADV].values.tolist()[0]
+            volume = volumePercent * acVol
+            pass
+        StatsData[ConfigChina.header_Volume] = volume
+        StatsData[ConfigChina.header_VolumePercent] = volumePercent
+        return StatsData
+        pass
+
+    def mergeRawDatas(self, RawInterVals, RawACVolumes, info=""):
         start_time = time.time()
-        symbol = str(static_info[ConfigChina.instrument_header_Symbol])
-        exchange = str(static_info[ConfigChina.instrument_header_Exchange])
-        InstrumentType = str(static_info[ConfigChina.instrument_header_InstrumentType])
-        SessionConfigs = self.exchangeSessionConfig.getSessionConfigs(exchange, InstrumentType)
-        HistIntervalStatsData = SessionConfigs.getSessions().get_hist_time_data_frame()
-        HistIntervalStatsData[ConfigChina.header_Symbol] = symbol
         HistInstrumentProfile = pd.DataFrame(columns=ConfigChina.GenusInstrumentProfile_header)
+        HistIntervalStatsData = pd.DataFrame(columns=ConfigChina.GenusHistIntervalStats_header)
         try:
-            acvol = RawACVolumes[ConfigChina.header_ADV].mean()
-            threads = []
-            IntervalStatSet = RawInterVals[RawInterVals[ConfigChina.header_TradeSize] > 0]
-            if IntervalStatSet.empty:
+            if RawInterVals.empty or RawACVolumes.empty:
                 return
-            statsGroup = IntervalStatSet.groupby(by=[ConfigChina.header_Symbol, ConfigChina.header_StartTime, ConfigChina.header_EndTime])
-            pool = ThreadPoolExecutor(max_workers=len(statsGroup.count()))
-            for (symbol, startTime, endTime), intervalStat in statsGroup:
-                threads.append(pool.submit(self.handleHistInterval, symbol, startTime, endTime, intervalStat))
                 pass
-            for future in threads:
-                add_data = future.result()
-                startTime = add_data[ConfigChina.header_StartTime]
-                row = HistIntervalStatsData[HistIntervalStatsData[ConfigChina.header_StartTime] == startTime]
-                index = max(row.index.tolist())
-                HistIntervalStatsData.loc[index] = pd.Series(add_data)
-                pass
-            HundredPercent = HistIntervalStatsData[ConfigChina.header_VolumePercent].sum()
-            HistIntervalStatsData[ConfigChina.header_VolumePercent] = HistIntervalStatsData[ConfigChina.header_VolumePercent] / HundredPercent
-            HistIntervalStatsData[ConfigChina.header_Volume] = HistIntervalStatsData[ConfigChina.header_VolumePercent] * acvol
+            RawInterVals = RawInterVals.fillna(0)
+            volGroup = RawACVolumes.groupby(by=[ConfigChina.header_Symbol])
+            # Profile
+            eligible_RawInterVals = RawInterVals[(RawInterVals[ConfigChina.header_TradeSize] > 0) & (RawInterVals[ConfigChina.header_isTradable] == "T")]
+            statsGroup = eligible_RawInterVals.groupby(by=[ConfigChina.header_Symbol])
+
+            AvgADV = self.handler_agg(volGroup[ConfigChina.header_ADV], np.mean, ConfigChina.header_ADV)
+            AvgVolatility = self.handler_agg(statsGroup[ConfigChina.header_Volatility], np.mean, ConfigChina.header_AvgVolatility)
+            AvgTradeSize = self.handler_agg(statsGroup[ConfigChina.header_TradeSize], np.mean, ConfigChina.header_TradeSize)
+            AvgSpreadeSize = self.handler_agg(statsGroup[ConfigChina.header_SpreadSize], np.mean, ConfigChina.header_AvgSpread)
+            AvgAskSize = self.handler_agg(statsGroup[ConfigChina.header_AskSize], np.mean, ConfigChina.header_AskSize)
+            AvgBidSize = self.handler_agg(statsGroup[ConfigChina.header_BidSize], np.mean, ConfigChina.header_BidSize)
+            HistInstrumentProfile = pd.concat([AvgADV, AvgVolatility, AvgTradeSize, AvgSpreadeSize, AvgAskSize, AvgBidSize], axis=1)
+            HistInstrumentProfile = HistInstrumentProfile.reset_index()
+
+            HistInstrumentProfile[ConfigChina.header_HasValidCurve] = "N"
+            HistInstrumentProfile[ConfigChina.header_HasValidCurve] = HistInstrumentProfile[ConfigChina.header_HasValidCurve].mask(HistInstrumentProfile[ConfigChina.header_ADV] > 0, "Y")
+            HistInstrumentProfile[ConfigChina.header_BTR] = (HistInstrumentProfile[ConfigChina.header_AskSize] + HistInstrumentProfile[ConfigChina.header_BidSize]) / 2 / HistInstrumentProfile[ConfigChina.header_TradeSize]
+            HistInstrumentProfile[ConfigChina.header_BTR] = HistInstrumentProfile[ConfigChina.header_BTR].mask(HistInstrumentProfile[ConfigChina.header_BTR] > 1000000, 1000000)
+            HistInstrumentProfile = HistInstrumentProfile[ConfigChina.GenusInstrumentProfile_header]
+            HistInstrumentProfile = HistInstrumentProfile.fillna(0)
+
+            # Intervals
+            statsGroup = RawInterVals.groupby(by=ConfigChina.symbol_start_end_header)
+            tradeSize_avg = self.handler_agg(statsGroup[ConfigChina.header_TradeSize], np.mean, ConfigChina.header_TradeSize)
+            tradeSize_std = self.handler_agg(statsGroup[ConfigChina.header_TradeSize], np.std, ConfigChina.header_TradeSizeSD)
+
+            bidSize_avg = self.handler_agg(statsGroup[ConfigChina.header_BidSize], np.mean, ConfigChina.header_BidSize)
+            bidSize_std = self.handler_agg(statsGroup[ConfigChina.header_BidSize], np.std, ConfigChina.header_BidSizeSD)
+
+            askSize_avg = self.handler_agg(statsGroup[ConfigChina.header_AskSize], np.mean, ConfigChina.header_AskSize)
+            askSize_std = self.handler_agg(statsGroup[ConfigChina.header_AskSize], np.std, ConfigChina.header_AskSizeSD)
+
+            spreadSize_avg = self.handler_agg(statsGroup[ConfigChina.header_SpreadSize], np.mean, ConfigChina.header_SpreadSize)
+            spreadSize_std = self.handler_agg(statsGroup[ConfigChina.header_SpreadSize], np.std, ConfigChina.header_SpreadSizeSD)
+
+            volume_avg = self.handler_agg(statsGroup[ConfigChina.header_Volume], np.mean, ConfigChina.header_Volume)
+            volume_std = self.handler_agg(statsGroup[ConfigChina.header_Volume], np.std, ConfigChina.header_VolumeSD)
+            volume_quantile = self.handler_agg(statsGroup[ConfigChina.header_Volume], self.handler_percentile, ConfigChina.header_VolumeQuant)
+            volumePercent_avg = self.handler_agg(statsGroup[ConfigChina.header_VolumePercent], np.mean, ConfigChina.header_VolumePercent)
+            volumePercent_std = self.handler_agg(statsGroup[ConfigChina.header_VolumePercent], np.std, ConfigChina.header_VolumePercentSD)
+
+            volatility_avg = self.handler_agg(statsGroup[ConfigChina.header_Volatility], np.mean, ConfigChina.header_Volatility)
+            volatility_std = self.handler_agg(statsGroup[ConfigChina.header_Volatility], np.std, ConfigChina.header_VolatilitySD)
+
+            ccVolatility_avg = self.handler_agg(statsGroup[ConfigChina.header_CCVolatility], np.mean, ConfigChina.header_CCVolatility)
+            ccVolatility_std = self.handler_agg(statsGroup[ConfigChina.header_CCVolatility], np.std, ConfigChina.header_CCVolatilitySD)
+
+            auction = self.handler_agg(statsGroup[ConfigChina.header_isAuction], "first", ConfigChina.header_isAuction)
+            tradable = self.handler_agg(statsGroup[ConfigChina.header_isTradable], "first", ConfigChina.header_isTradable)
+
+            HistIntervalStatsData = pd.concat([tradeSize_avg, tradeSize_std, bidSize_avg, bidSize_std, askSize_avg, askSize_std,
+                                               spreadSize_avg, spreadSize_std, volume_avg, volume_std, volumePercent_avg, volumePercent_std,
+                                               volatility_avg, volatility_std, ccVolatility_avg, volume_quantile, ccVolatility_std,
+                                               auction, tradable], axis=1)
+            HistIntervalStatsData = HistIntervalStatsData.reset_index()
+            HistIntervalStatsData[ConfigChina.header_Volume] = HistIntervalStatsData[ConfigChina.header_Volume].mask(HistIntervalStatsData[ConfigChina.header_isAuction] == "T", HistIntervalStatsData[ConfigChina.header_VolumeQuant])
+
+            HistIntervalStatsData = HistIntervalStatsData.apply(self.handler_InterVal_Apply, axis=1, HistIntervalStatsData=HistIntervalStatsData, HistInstrumentProfile=HistInstrumentProfile)
 
             HistIntervalStatsData = HistIntervalStatsData[ConfigChina.GenusHistIntervalStats_header]
             HistIntervalStatsData = HistIntervalStatsData.fillna(0)
-
-            if not HistIntervalStatsData.empty:
-                BTR = 0
-                HasValidCurve = "N"
-                IntervalStatSet = IntervalStatSet[IntervalStatSet[ConfigChina.header_isTradable] == "T"]
-                AvgADV = RawACVolumes[ConfigChina.header_ADV].mean()
-                AvgVolatility = IntervalStatSet[ConfigChina.header_Volatility].mean()
-                AvgBookSize = np.mean([IntervalStatSet[ConfigChina.header_BidSize].mean(), IntervalStatSet[ConfigChina.header_AskSize].mean()])
-                AvgTradeSize = IntervalStatSet[ConfigChina.header_TradeSize].mean()
-                AvgSpreadeSize = IntervalStatSet[ConfigChina.header_SpreadSize].mean()
-                if (AvgBookSize and AvgBookSize > 0 and AvgTradeSize and AvgTradeSize > 0):
-                    BTR = np.min([(AvgBookSize / AvgTradeSize), 1000000])
-                    pass
-                if (AvgADV and AvgADV > 0):
-                    HasValidCurve = "Y"
-                    pass
-                data = {
-                    ConfigChina.header_Symbol: [symbol],
-                    ConfigChina.header_AvgSpread: [AvgSpreadeSize],
-                    ConfigChina.header_AvgVolatility: [AvgVolatility],
-                    ConfigChina.header_ADV: [AvgADV],
-                    ConfigChina.header_BTR: [BTR],
-                    ConfigChina.header_HasValidCurve: [HasValidCurve]
-                }
-                HistInstrumentProfile = pd.DataFrame(data, columns=ConfigChina.GenusInstrumentProfile_header)
-                HistInstrumentProfile = HistInstrumentProfile.fillna(0)
         except:
             logger.write("traceback.format_exc():\n{0}".format(traceback.format_exc()))
             pass
@@ -379,10 +381,11 @@ class GenusHistHandler:
                                                              ConfigChina.header_AskSize: 2, ConfigChina.header_AskSizeSD: 2,
                                                              ConfigChina.header_SpreadSize: 2, ConfigChina.header_SpreadSizeSD: 2,
                                                              ConfigChina.header_Volume: 2, ConfigChina.header_VolumeSD: 2,
-                                                             ConfigChina.header_VolumePercent: 2, ConfigChina.header_VolumePercentSD: 2,
+                                                             # ConfigChina.header_VolumePercent: 3, ConfigChina.header_VolumePercentSD: 2,
                                                              ConfigChina.header_Volatility: 2, ConfigChina.header_VolatilitySD: 2,
                                                              ConfigChina.header_CCVolatility: 2, ConfigChina.header_CCVolatilitySD: 2,
                                                              })
+
         HistInstrumentProfile = HistInstrumentProfile.round({ConfigChina.header_AvgSpread: 2, ConfigChina.header_AvgVolatility: 2,
                                                              ConfigChina.header_BTR: 2
                                                              })

@@ -59,5 +59,36 @@ def getInstrumentList(targetDate, exchanges, instrumentTypes):
     data_Instrument = data_frame_read_sql(querySQL)
     if data_Instrument.empty:
         logger.write("Not Found GenusInstrument From DB :{} - {} ".format(config.dbhost, config.dbname))
+        pass
     return data_Instrument
+    pass
+
+
+def genTodayBusinessDay(today):
+    logger.write("getBusinessDay from DB: Today>>  {0}".format(today))
+    year = str(today)[0:4]
+    preDate = str(int(year) - 1) + str(today)[4:]
+    querySQL = "select TheDate From GenusTradingDays WHERE  TheDate >='{0}' Order BY  TheDate DESC ".format(preDate)
+    data_Instrument = data_frame_read_sql(querySQL)
+    if data_Instrument.empty:
+        logger.write("Not Found GenusTradingDays From DB :{} - {} ".format(config.dbhost, config.dbname))
+        os._exit(0)
+        pass
+
+    if data_Instrument[data_Instrument["TheDate"] == int(today)].empty:
+        logger.write("TargetDate {} is NOT a business day! Please Check".format(today))
+        os._exit(0)
+        pass
+    if data_Instrument[data_Instrument["TheDate"] > int(today)].empty:
+        logger.write("Nex business day is Null! Please Check".format(today))
+        os._exit(0)
+        pass
+
+    nextBusinessDay = data_Instrument[data_Instrument["TheDate"] > int(today)].min()
+    nextBusinessDay = str(nextBusinessDay["TheDate"])
+    prev_business_days = data_Instrument[data_Instrument["TheDate"] < int(today)]
+    prev_business_days.columns = ['TradeDay']
+    logger.write("Next Business Day >> {0} ".format(nextBusinessDay))
+    logger.write("getBusinessDay  Done")
+    return prev_business_days, nextBusinessDay
     pass

@@ -10,7 +10,9 @@ fi
 
 
 
-export WORKDIR=$HOME/hist_data
+script_dir=$(cd $(dirname $0);pwd)
+
+export WORKDIR=$(dirname $script_dir)
 
 DATETODAY=${1:-`date +\%Y\%m\%d`}
 
