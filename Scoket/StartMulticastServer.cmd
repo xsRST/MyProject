@@ -31,7 +31,10 @@ set APP_MAIN=com.genus.xs.multicast.server.MulticastServer
 REM  -----------------------------------------------------------------------------
 REM  set application arguments
 REM  -----------------------------------------------------------------------------
-set APP_ARGS=192.168.2.131 233.36.26.128 6628 
+set APP_ARGS=
+set AFEMdsLocal=192.168.52.34
+set AFEMdsHost=233.36.26.128
+set AFEMdsPort=6628
 
 REM  -----------------------------------------------------------------------------
 REM  set logging file
@@ -44,6 +47,10 @@ REM  ---------------------------------------------------------------------------
 
 set COMMAND=java %JAVA_OPTS%
 set COMMAND=%COMMAND% -DROOTDIR=%ROOTDIR%
+set COMMAND=%COMMAND%  -DMsgType=AFE
+set COMMAND=%COMMAND%  -DMdsLocal=%AFEMdsLocal%
+set COMMAND=%COMMAND%  -DMdsHost=%AFEMdsHost%
+set COMMAND=%COMMAND%  -DMdsPort=%AFEMdsPort%
 set COMMAND=%COMMAND% -classpath "%CLASSPATH%"
 set COMMAND=%COMMAND% %APP_MAIN%
 set COMMAND=%COMMAND% %APP_ARGS%

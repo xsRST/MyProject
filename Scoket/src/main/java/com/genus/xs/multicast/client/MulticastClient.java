@@ -143,7 +143,7 @@ public class MulticastClient {
                         }
                     }
                     client.send(list);
-                    Thread.sleep(500);
+                    Thread.sleep(5000);
                 }
             }
         }

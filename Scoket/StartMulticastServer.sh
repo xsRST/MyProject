@@ -18,12 +18,12 @@ JAVA_OPTS=
 #  -----------------------------------------------------------------------------
 #   system parameters
 #  -----------------------------------------------------------------------------
- ROOTDIR=.
+ ROOTDIR=$(cd `dirname $0`; pwd)
 
 #  -----------------------------------------------------------------------------
 #   classpath
 #  -----------------------------------------------------------------------------
- CLASSPATH=${ROOTDIR}\Scoket-1.0-SNAPSHOT.jar;${ROOTDIR}\3rd\*
+ CLASSPATH="${ROOTDIR}/Scoket-1.0-SNAPSHOT.jar:$ROOTDIR/3rd/slf4j-log4j12-1.7.1.jar:${ROOTDIR}/3rd/*"
 
 #  -----------------------------------------------------------------------------
 #   main class
@@ -33,20 +33,29 @@ JAVA_OPTS=
 #  -----------------------------------------------------------------------------
 #   application arguments
 #  -----------------------------------------------------------------------------
- APP_ARGS="192.168.2.131 233.36.26.128 6628"
+ APP_ARGS=
+
+
+AFEMdsLocal=192.168.240.49
+AFEMdsHost=233.36.26.131,239.6.6.66
+AFEMdsPort=6628,6628
 
 #  -----------------------------------------------------------------------------
 #   logging file
 #  -----------------------------------------------------------------------------
- LOGFILE="${ROOTDIR}\${DATE}.MulticastServer.log"
+ LOGFILE="${ROOTDIR}/${DATE}.MulticastServer.log"
 
 #  -----------------------------------------------------------------------------
 #  run the command
 #  -----------------------------------------------------------------------------
 
 COMMAND="$JAVA_HOME/bin/java ${JAVA_OPTS}"
- COMMAND="${COMMAND} -classpath ${CLASSPATH}"
- COMMAND="${COMMAND} $APP_MAIN}"
+ COMMAND="${COMMAND} -DMsgType=AFE"
+ COMMAND="${COMMAND} -DMdsLocal=${AFEMdsLocal}"
+ COMMAND="${COMMAND} -DMdsHost=${AFEMdsHost}"
+ COMMAND="${COMMAND} -DMdsPort=${AFEMdsPort}"
+  COMMAND="${COMMAND} -classpath ${CLASSPATH}"
+ COMMAND="${COMMAND} ${APP_MAIN}"
  COMMAND="${COMMAND} ${APP_ARGS}"
 
 echo ${COMMAND}

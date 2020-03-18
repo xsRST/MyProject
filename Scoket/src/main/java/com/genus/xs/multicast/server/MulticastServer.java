@@ -10,6 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.NetUtil;
+import org.apache.commons.lang.StringUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -21,12 +22,14 @@ public class MulticastServer {
 
     private InetSocketAddress groupAddress;
     private String localIp;
+    private String msgType;
 
 //    public MulticastServer(InetSocketAddress groupAddress) {
 //        this.groupAddress = groupAddress;
 //    }
 
-    public MulticastServer(InetSocketAddress groupAddress, String localIp) {
+    public MulticastServer(String msgType, InetSocketAddress groupAddress, String localIp) {
+        this.msgType = msgType;
         this.groupAddress = groupAddress;
         this.localIp = localIp;
     }
@@ -54,7 +57,7 @@ public class MulticastServer {
                     .handler(new ChannelInitializer<NioDatagramChannel>() {
                         @Override
                         public void initChannel(NioDatagramChannel ch) throws Exception {
-                            ch.pipeline().addLast(new MessageHandler());
+                            ch.pipeline().addLast(new MessageHandler(msgType));
                         }
                     });
 
@@ -73,29 +76,29 @@ public class MulticastServer {
 
     public static void main(String[] args) throws Exception {
         System.out.println("args:" + args);
-        String localAddress = null;
-        String address = "233.36.26.128";
-        String groupPort = "6628";
-        if (args.length == 3) {
-            localAddress = args[0];
-            address = args[1];
-            groupPort = args[2];
-        } else {
-            System.exit(0);
-        }
-        System.out.println("localAddress:" + localAddress);
-        System.out.println("address:" + address);
-        System.out.println("groupPort:" + groupPort);
-        String[] ports = groupPort.split(",");
-        for (int i = 0; i < ports.length; i++) {
 
-            String port = ports[i];
-            String ip = address.split(",")[i];
-            String localIp = localAddress.split(",").length == 1 ? localAddress : localAddress.split(",")[i];
-            InetSocketAddress groupAddress = new InetSocketAddress(ip, Integer.parseInt(port));
-            new Thread(() -> {
-                new MulticastServer(groupAddress, localIp).run();
-            }).start();
+        if (StringUtils.isNotEmpty(System.getProperty("MsgType"))) {
+            String MsgType = System.getProperty("MsgType");
+            String MdsLocal = System.getProperty("MdsLocal");
+            String MdsHost = System.getProperty("MdsHost");
+            String MdsPort = System.getProperty("MdsPort");
+            System.out.println("MsgType>> " + MsgType + "\nMdsLocal>> " + MdsLocal + "\nMdsHost>> " + "\nMdsPort>> " + MdsPort);
+            if (StringUtils.isNotEmpty(MdsHost)) {
+                String[] ports = MdsPort.split(",");
+                for (int i = 0; i < ports.length; i++) {
+
+                    String port = ports[i];
+                    String ip = MdsHost.split(",")[i];
+                    String localIp = MdsLocal.split(",").length == 1 ? MdsLocal : MdsLocal.split(",")[i];
+                    InetSocketAddress groupAddress = new InetSocketAddress(ip, Integer.parseInt(port));
+                    new Thread(() -> {
+                        new MulticastServer(MsgType, groupAddress, localIp).run();
+                    }).start();
+                }
+
+            }
+        } else {
+            System.out.println("MsgType is Empty");
         }
     }
 }
