@@ -5,12 +5,13 @@ import com.genus.ctp.mode.GenusCTPDepthMarketDataField;
 import com.genus.ctp.mode.GenusCTPInstrumentField;
 import com.genus.ctp.mode.GenusCTPRspInfoField;
 import com.genus.ctp.option.GenusCTPOption;
-import com.genus.ctp.utils.GenusCTPFileWriter;
+import com.genus.ctp.utils.GenusCTPFileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import static com.genus.ctp.GenusCTPConfig.*;
 
@@ -18,9 +19,9 @@ import static com.genus.ctp.GenusCTPConfig.*;
 public class GenusCTPServerManager {
     private static Logger logger = LogManager.getLogger(GenusCTPServerManager.class);
     private static GenusCTPHandle handle;
-    protected Map<String, GenusCTPInstrumentField> ctpStaticMap = new TreeMap<>();
-    protected Map<String, GenusCTPDepthMarketDataField> ctpDepthMDMap = new TreeMap<>();
-
+    public static Map<String, GenusCTPInstrumentField> ctpStaticMap = new TreeMap<>();
+    protected static Map<String, GenusCTPDepthMarketDataField> ctpDepthMDMap = new TreeMap<>();
+    private static Pattern p = Pattern.compile("([A-Za-z]+)(\\d+)");
     protected long receiveMdsCount = 0;
     protected long receiveStaticCount = 0;
 
@@ -29,8 +30,9 @@ public class GenusCTPServerManager {
         if (GenusCTPOption.Mode.Normal == mode) {
             handle.generatorAndSubscribe();
         } else if (GenusCTPOption.Mode.StaticOnly == mode) {
-            GenusCTPHandle.generatorStatic();
+            handle.generatorStatic();
         } else if (GenusCTPOption.Mode.SubscribeOnly == mode) {
+            ctpStaticMap = GenusCTPFileUtil.retrieveStaticFromFile();
             handle.subscribeOnly();
         }
     }
@@ -50,7 +52,7 @@ public class GenusCTPServerManager {
         }
         if (bIsLast == true) {
             logger.info("接收合约行情数量={} ,实际写入={}", receiveMdsCount, ctpDepthMDMap.size());
-            GenusCTPFileWriter.writeTradeData2File(ctpStaticMap, ctpDepthMDMap);
+            GenusCTPFileUtil.writeTradeData2File(ctpStaticMap, ctpDepthMDMap);
         }
     }
 

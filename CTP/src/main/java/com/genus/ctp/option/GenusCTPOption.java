@@ -3,7 +3,7 @@ package com.genus.ctp.option;
 public class GenusCTPOption {
 
 
-    public enum Mode {
+    public static enum Mode {
         Normal("Normal"),
         StaticOnly("StaticOnly"),
         SubscribeOnly("SubscribeOnly");
@@ -27,7 +27,7 @@ public class GenusCTPOption {
         }
     }
 
-    public enum ProductClassType {
+    public static enum ProductClassType {
 
         ///期货
         THOST_FTDC_PC_Futures('1'),
@@ -47,7 +47,6 @@ public class GenusCTPOption {
         public String getTheValue() {
             return String.valueOf(theValue);
         }
-
         ProductClassType(char theValue) {
             this.theValue = theValue;
         }
@@ -64,7 +63,7 @@ public class GenusCTPOption {
     }
 
 
-    public enum CombinationType {
+    public static enum CombinationType {
 
         ///期货对锁组合
         THOST_FTDC_DCECOMBT_SPL('0'),

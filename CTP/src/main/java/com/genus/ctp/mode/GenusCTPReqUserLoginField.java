@@ -34,7 +34,6 @@ public class GenusCTPReqUserLoginField implements Serializable {
     public GenusCTPReqUserLoginField(String brokerID) {
         BrokerID = brokerID;
     }
-
     public GenusCTPReqUserLoginField(String brokerID, String userID, String password) {
         BrokerID = brokerID;
         UserID = userID;

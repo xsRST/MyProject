@@ -32,14 +32,13 @@ public class Genus18Future {
 
     private static Map<String, List> future_i_map = new HashMap<>();
     private static Map<String, List> future_t_map = new HashMap<>();
-
     static {
-        future_i_map.put(future_ic, Arrays.asList("中证", "中证500股指期货", "0.2", "200", "200", "0.12", "0.12"));
-        future_i_map.put(future_if, Arrays.asList("沪深", "沪深300股指期货", "0.2", "100", "300", "0.1", "0.1"));
-        future_i_map.put(future_ih, Arrays.asList("上证", "上证50股指期货", "0.2", "200", "300", "0.1", "0.1"));
+        future_i_map.put(future_ic, Arrays.asList(new String[]{"中证", "中证500股指期货", "0.2", "200", "200", "0.12", "0.12"}));
+        future_i_map.put(future_if, Arrays.asList(new String[]{"沪深", "沪深300股指期货", "0.2", "100", "300", "0.1", "0.1"}));
+        future_i_map.put(future_ih, Arrays.asList(new String[]{"上证", "上证50股指期货", "0.2", "200", "300", "0.1", "0.1"}));
 
-        future_t_map.put(future_tf, Arrays.asList("5年期国债期货", "票面利率为3%的名义中期国债", "0.005", "500", "10000", "0.012", "0.012"));
-        future_t_map.put(future_t, Arrays.asList("10年期国债期货", "10年期国债期货", "0.005", "500", "10000", "0.02", "0.02"));
+        future_t_map.put(future_tf, Arrays.asList(new String[]{"5年期国债期货", "票面利率为3%的名义中期国债", "0.005", "500", "10000", "0.012", "0.012"}));
+        future_t_map.put(future_t, Arrays.asList(new String[]{"10年期国债期货", "10年期国债期货", "0.005", "500", "10000", "0.02", "0.02"}));
 
     }
 
@@ -52,7 +51,7 @@ public class Genus18Future {
             writeData2Map(i_contract_year_month_map, future_i_map);
             writeData2Map(t_contract_year_month_map, future_t_map);
             logger.info("开始写入18个静态数据 ");
-            GenusCTPFileWriter.writeTradeData2File(ctpStaticMap, ctpDepthMDMap);
+            GenusCTPFileUtil.writeTradeData2File(ctpStaticMap, ctpDepthMDMap);
             logger.info("生成数据完成...");
         } catch (Exception e) {
             logger.error("", e);

@@ -64,7 +64,7 @@ def getInstrumentList(targetDate, exchanges, instrumentTypes):
     pass
 
 
-def genTodayBusinessDay(today):
+def genBusinessDay(today):
     logger.write("getBusinessDay from DB: Today>>  {0}".format(today))
     year = str(today)[0:4]
     preDate = str(int(year) - 1) + str(today)[4:]
@@ -84,11 +84,15 @@ def genTodayBusinessDay(today):
         os._exit(0)
         pass
 
-    nextBusinessDay = data_Instrument[data_Instrument["TheDate"] > int(today)].min()
-    nextBusinessDay = str(nextBusinessDay["TheDate"])
-    prev_business_days = data_Instrument[data_Instrument["TheDate"] < int(today)]
+    data_Instrument.sort_values(by=["TheDate"], axis=0, ascending=True, inplace=True)
+
+    nextBusinessDay = data_Instrument[data_Instrument["TheDate"] > int(today)].head(1)
+    prev_business_days = data_Instrument[data_Instrument["TheDate"] <= int(today)]
     prev_business_days.columns = ['TradeDay']
-    logger.write("Next Business Day >> {0} ".format(nextBusinessDay))
+    nextBusinessDay.columns = ['TradeDay']
+    nextBusinessDay.reset_index(drop=True, inplace=True)
+    prev_business_days.reset_index(drop=True, inplace=True)
     logger.write("getBusinessDay  Done")
     return prev_business_days, nextBusinessDay
     pass
+

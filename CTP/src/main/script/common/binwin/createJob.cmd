@@ -1,0 +1,1 @@
+schtasks /Create /tn GenusCTPServer /tr %~dp0\StartGenusCTPServer.cmd /sc WEEKLY /d MON,TUE,WED,THU,FRI /st 08:30:00

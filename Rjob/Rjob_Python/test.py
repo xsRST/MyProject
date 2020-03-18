@@ -5,7 +5,7 @@ import sys
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
-from jobs import ConfigChina
+from Rjob_Python.jobs import ConfigChina
 
 sys.path.append(os.getenv("HOME") + "/Python/monitor")
 

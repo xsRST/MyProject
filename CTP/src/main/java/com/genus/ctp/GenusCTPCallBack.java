@@ -32,7 +32,6 @@ public abstract class GenusCTPCallBack {
     public boolean isConnected() {
         return isConnected;
     }
-
     /**
      * 当客户端与交易后台建立起通信连接时（还未登录前），该方法被调用。
      */
@@ -74,7 +73,11 @@ public abstract class GenusCTPCallBack {
      * @param bIsLast
      */
     protected void OnRspUserLogin(GenusCTPRspUserLoginField rspUserLoginField, GenusCTPRspInfoField rspInfoField, int nRequestID, boolean bIsLast) {
-        isAction = rspInfoField.getErrorID() == 0;
+        if (rspInfoField.getErrorID() == 0) {
+            isAction = true;
+        } else {
+            isAction = false;
+        }
 
 
     }

@@ -54,6 +54,7 @@ public class GenusCTPConfig {
     public static Map<String, String> filterExchangeMap = new HashMap<>();
 
 
+
     public static void init() throws Exception {
         fillCTPConfig();
     }

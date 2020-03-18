@@ -3,7 +3,7 @@ package com.genus.ctp.callback;
 import com.genus.ctp.GenusCTPCallBack;
 import com.genus.ctp.GenusCTPServerManager;
 import com.genus.ctp.mode.*;
-import com.genus.ctp.utils.GenusCTPFileWriter;
+import com.genus.ctp.utils.GenusCTPFileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,6 +45,6 @@ public class GenusCTPMarketDataCallback extends GenusCTPCallBack {
             logger.info(depthMarketDataField.toString());
         }
         receiveCount++;
-        GenusCTPFileWriter.writeMarketData2File(depthMarketDataField);
+        GenusCTPFileUtil.writeMarketData2File(depthMarketDataField);
     }
 }

@@ -10,7 +10,7 @@ import com.genus.ctp.impl.GenusCTPServerImpl;
 import com.genus.ctp.mode.GenusCTPQryDepthMarketDataField;
 import com.genus.ctp.mode.GenusCTPQryInstrumentField;
 import com.genus.ctp.utils.Genus18Future;
-import com.genus.ctp.utils.GenusCTPFileWriter;
+import com.genus.ctp.utils.GenusCTPFileUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,6 +65,7 @@ public class GenusCTPHandle {
             if (result != 0) {
                 throw new CTPException("生成数据失败, 退出程序");
             }
+            GenusCTPServerManager.ctpStaticMap = GenusCTPFileUtil.retrieveStaticFromFile();
         }
         if (tradeCallback.isAction() == true) {
             logger.info("期货交易日: {}", ctpServer.GetTradingDay());
@@ -84,13 +85,12 @@ public class GenusCTPHandle {
             }
         }
 
-        while (GenusCTPFileWriter.writeStaticFileEnd == false) {
+        while (GenusCTPFileUtil.writeStaticFileEnd == false) {
             Thread.sleep(4 * 1000);
             logger.info("等待静态静态数据文件写入完成 ...");
         }
 
     }
-
     private static void subscribeDataFromInstrumentTxt() throws Exception {
         logger.info("开始订阅期货行情... ");
         if (getInstrumentTxtFile().exists() == false || getInstrumentTxtFile().isFile() == false) {
