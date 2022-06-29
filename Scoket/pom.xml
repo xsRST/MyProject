@@ -20,7 +20,7 @@
         <slf4j.version>1.7.1</slf4j.version>
         <commons.math.version>3.5</commons.math.version>
         <commons.lang.version>2.4</commons.lang.version>
-        <apache.mina.version>2.0.9</apache.mina.version>
+        <apache.mina.version>2.0.22</apache.mina.version>
     </properties>
 
     <dependencies>
